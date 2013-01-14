@@ -36,6 +36,8 @@ namespace BindHub.Client
             Console.WriteLine();
             Console.WriteLine(_requestor.GetAll);
             Console.ReadKey();
+            Console.WriteLine(_requestor.UpdateIp("", ""));
+            Console.ReadKey();
         }
     }
 }

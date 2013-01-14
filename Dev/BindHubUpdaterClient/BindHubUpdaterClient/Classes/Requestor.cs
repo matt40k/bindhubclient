@@ -55,6 +55,14 @@ namespace BindHub.Client
             }
         }
 
+        public bool SetUseProxy
+        {
+            set
+            {
+                _useProxy = value;
+            }
+        }
+
         public string GetIp
         {
             get
@@ -128,12 +136,39 @@ namespace BindHub.Client
             }
         }
 
-        public bool SetUseProxy
+        public string UpdateIp(string record, string target)
         {
-            set
+            string postData = "user=" + _apiUser + "&key=" + _apiKey + "&record=" + record + "&target=" + target;
+            string result = null;
+            StreamWriter requestWriter;
+
+            Uri ipUrl = new Uri(_apiUrl + "record/update.json");
+            try
             {
-                _useProxy = value;
+                WebRequest request = WebRequest.Create(ipUrl);
+                request.Method = "POST";
+                request.ContentType = "application/x-www-form-urlencoded";
+                if (false)
+                {
+                    WebProxy proxy = (WebProxy)WebRequest.DefaultWebProxy;
+                    request.Proxy = proxy;
+                }
+                //POST the data.
+                using (requestWriter = new StreamWriter(request.GetRequestStream()))
+                {
+                    requestWriter.Write(postData);
+                }
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                logger.Log(NLog.LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
+                Stream dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
+                result = reader.ReadToEnd();
             }
+            catch (WebException GetAll_WebException)
+            {
+                Console.WriteLine(GetAll_WebException.ToString());
+            }
+            return result;
         }
     }
 }
