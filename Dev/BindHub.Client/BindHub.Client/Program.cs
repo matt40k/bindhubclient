@@ -7,23 +7,30 @@ using System;
 using System.Data;
 using System.Windows;
 using System.Windows.Media;
+using NLog;
 
 namespace BindHub.Client
 {
     class Program : Window
     {
-        private Config _config;
+        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        
         [STAThread]
         static void Main()
         {
             Config _config = new Config();
             if (!_config.DoesConfigExist)
             {
+                logger.Log(NLog.LogLevel.Info, "Config not found, running config ui");
                 Application application = new Application();
                 application.Run(new MainWindow(_config));
+            } 
+            if (_config.DoesConfigExist)
+            {
+                logger.Log(NLog.LogLevel.Info, "Config found");
+                Updater _updater = new Updater(_config);
+                _updater.Worker();
             }
-            Updater _updater = new Updater(_config);
-            _updater.Worker();
         }
     }
 }

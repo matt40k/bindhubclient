@@ -7,11 +7,14 @@ using System;
 using System.Data;
 using System.IO;
 using System.Net;
+using NLog;
 
 namespace BindHub.Client
 {
     public class Requestor
     {
+        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+
         private string _apiUrl;
         private string _apiKey;
         private string _apiUser;
@@ -78,6 +81,24 @@ namespace BindHub.Client
             string postData = "user=" + _apiUser + "&key=" + _apiKey + "&record=" + record + "&target=" + target;
             HttpWebResponse response = request(url, "POST", postData);
             ds.ReadXml(response.GetResponseStream());
+
+            if (ds.Tables.Contains("bindhub"))
+                ds.Tables["bindhub"].TableName = "entity";
+
+
+            foreach (DataTable dt in ds.Tables)
+            {
+                Console.WriteLine(dt.TableName);
+                foreach (DataRow row in dt.Rows) // Loop over the rows.
+                {
+                    Console.WriteLine("--- Row ---"); // Print separator.
+                    foreach (var item in row.ItemArray) // Loop over the items.
+                    {
+                        Console.Write("Item: "); // Print label.
+                        Console.WriteLine(item); // Invokes ToString abstract method.
+                    }
+                }
+            }
 
             if (ds.Tables.Contains("entity"))
                 return ds.Tables["entity"];

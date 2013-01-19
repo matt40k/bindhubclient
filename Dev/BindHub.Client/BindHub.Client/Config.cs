@@ -7,11 +7,14 @@ using System;
 using System.Data;
 using System.IO;
 using System.Xml;
+using NLog;
 
 namespace BindHub.Client
 {
     public class Config
     {
+        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+
         private string bindhubConfigName = "bindhub.config";
         private DataSet _ds;
         private DataTable _config;
@@ -115,10 +118,16 @@ namespace BindHub.Client
             }
         }
 
-        public void UpdateIp(string record, string target)
+        public DataTable UpdateIp(string record, string target)
         {
-            // TODO
-            DataTable _ds = _requestor.UpdateIp(record, target);
+            DataTable _dt = _requestor.UpdateIp(record, target);
+            if (_dt != null)
+            {
+                logger.Log(NLog.LogLevel.Error, "test");
+                _record.Merge(_dt);
+            } bool save = Save;
+            logger.Log(NLog.LogLevel.Info, save);
+            return _record;
         }
 
         public void ReloadRecords()
@@ -214,7 +223,7 @@ namespace BindHub.Client
             }
             catch (Exception Write_Exception)
             {
-                System.Windows.MessageBox.Show(Write_Exception.ToString());
+                logger.Log(NLog.LogLevel.Error, Write_Exception.ToString);
                 return false;
             }
 
@@ -225,14 +234,22 @@ namespace BindHub.Client
         {
             get
             {
-                if (_ds.Tables.Contains("config"))
-                    _ds.Tables.Remove("config");
-                if (_ds.Tables.Contains("entity"))
-                    _ds.Tables.Remove("entity");
-                _ds.Tables.Add(_config);
-                _ds.Tables.Add(_record);
-                _ds.WriteXml(bindHubConfigFile, XmlWriteMode.WriteSchema);
-                return true;
+                try
+                {
+                    if (_ds.Tables.Contains("config"))
+                        _ds.Tables.Remove("config");
+                    if (_ds.Tables.Contains("entity"))
+                        _ds.Tables.Remove("entity");
+                    _ds.Tables.Add(_config);
+                    _ds.Tables.Add(_record);
+                    _ds.WriteXml(bindHubConfigFile, XmlWriteMode.WriteSchema);
+                    return true;
+                }
+                catch (Exception Save_Exception)
+                {
+                    logger.Log(NLog.LogLevel.Error, Save_Exception);
+                }
+                return false;
             }
         }
 

@@ -6,11 +6,14 @@
 using System;
 using System.Data;
 using System.Threading;
+using NLog;
 
 namespace BindHub.Client
 {
     public class Updater
     {
+        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+
         private Config _config;
 
         public Updater(Config config)
@@ -26,6 +29,7 @@ namespace BindHub.Client
 
             while(true)
             {
+                logger.Log(NLog.LogLevel.Info, "Checking");
                 foreach (DataRow dr in _dtRecords.Rows)
                 {
                     if (dr["sync"].ToString().ToLower() == "true")
@@ -33,7 +37,8 @@ namespace BindHub.Client
                         if (dr["target"].ToString() != _publicIP)
                         {
                             string record = dr["record"].ToString();
-                            _config.UpdateIp(record, _publicIP);
+                            logger.Log(NLog.LogLevel.Info, "Updating " + record);
+                            _dtRecords = _config.UpdateIp(record, _publicIP);
                         }
                     }
                 }
