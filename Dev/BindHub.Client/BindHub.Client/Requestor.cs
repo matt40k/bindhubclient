@@ -18,6 +18,8 @@ namespace BindHub.Client
         private string _apiUrl;
         private string _apiKey;
         private string _apiUser;
+        private WebProxy _proxy;
+        private bool useProxy;
 
         private HttpWebResponse request(Uri url, string method, string postData)
         {
@@ -25,10 +27,13 @@ namespace BindHub.Client
             StreamWriter requestWriter;
             request.Method = method;
             request.ContentType = "application/x-www-form-urlencoded";
-            if (false)
+            if (useProxy)
             {
-                WebProxy proxy = (WebProxy)WebRequest.DefaultWebProxy;
-                request.Proxy = proxy;
+                request.Proxy = _proxy;
+            }
+            else
+            {
+                request.Proxy = null;
             }
             if (!string.IsNullOrEmpty(postData))
             {
@@ -47,7 +52,7 @@ namespace BindHub.Client
                 DataSet ds = new DataSet("bindhub");
                 Uri url = new Uri(_apiUrl + "ip.xml");
                 HttpWebResponse response = request(url, "GET", null);
-                //logger.Log(NLog.LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
+                logger.Log(NLog.LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
                 ds.ReadXml(response.GetResponseStream());
 
                 if (ds.Tables.Contains("address"))
@@ -65,6 +70,7 @@ namespace BindHub.Client
                 Uri url = new Uri(_apiUrl + "record.xml");
                 string postData = "user=" + _apiUser + "&key=" + _apiKey;
                 HttpWebResponse response = request(url, "POST", postData);
+                logger.Log(NLog.LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
                 ds.ReadXml(response.GetResponseStream());
 
                 if (ds.Tables.Contains("entity"))
@@ -80,32 +86,16 @@ namespace BindHub.Client
             Uri url = new Uri(_apiUrl + "record/update.xml");
             string postData = "user=" + _apiUser + "&key=" + _apiKey + "&record=" + record + "&target=" + target;
             HttpWebResponse response = request(url, "POST", postData);
+            logger.Log(NLog.LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
             ds.ReadXml(response.GetResponseStream());
 
             if (ds.Tables.Contains("bindhub"))
                 ds.Tables["bindhub"].TableName = "entity";
-
-
-            foreach (DataTable dt in ds.Tables)
-            {
-                Console.WriteLine(dt.TableName);
-                foreach (DataRow row in dt.Rows) // Loop over the rows.
-                {
-                    Console.WriteLine("--- Row ---"); // Print separator.
-                    foreach (var item in row.ItemArray) // Loop over the items.
-                    {
-                        Console.Write("Item: "); // Print label.
-                        Console.WriteLine(item); // Invokes ToString abstract method.
-                    }
-                }
-            }
-
             if (ds.Tables.Contains("entity"))
                 return ds.Tables["entity"];
 
             return null;
         }
-
 
         public string SetApiUrl
         {
@@ -131,6 +121,22 @@ namespace BindHub.Client
             {
                 if (!string.IsNullOrEmpty(value))
                     _apiUser = value;
+            }
+        }
+
+        public WebProxy SetWebProxy
+        {
+            set
+            {
+                _proxy = value;
+            }
+        }
+
+        public bool UseProxy
+        {
+            set
+            {
+                useProxy = value;
             }
         }
     }

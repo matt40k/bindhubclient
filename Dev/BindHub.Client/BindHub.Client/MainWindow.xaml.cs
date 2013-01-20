@@ -31,27 +31,30 @@ namespace BindHub.Client
         private Config _config;
         private DataTable _dt;
 
+        private string _proxyAddress;
+        private string _proxyPort;
+        private string _proxyUser;
+        private string _proxyPass;
+        private bool _useWin;
+
         public MainWindow(Config config)
         {
             _config = config;
             InitializeComponent();
+            getProxy();
         }
 
-        private void IsUsingProxy(bool UseProxy)
+        private void getProxy()
         {
-            if (UseProxy)
+            string proxyAddress = _config.GetProxyAddress;
+            string proxyPort = _config.GetProxyPort;
+
+            if (!string.IsNullOrWhiteSpace(proxyAddress))
             {
-                textProxyAddress.IsEnabled = true;
-                textProxyPort.IsEnabled = true;
-                checkProxyAuth.IsEnabled = true;
-                IsUsingWinAuth(IsWinAuthChecked);
-            }
-            else
-            {
-                textProxyAddress.IsEnabled = false;
-                textProxyPort.IsEnabled = false;
-                checkProxyAuth.IsEnabled = false;
-                IsUsingWinAuth(false);
+                this.checkProxy.IsChecked = true;
+                IsUsingProxy(true);
+                this.textProxyAddress.Text = proxyAddress;
+                this.textProxyPort.Text = proxyPort;
             }
         }
 
@@ -83,6 +86,42 @@ namespace BindHub.Client
                     return true;
                 } 
                 return false;
+            }
+        }
+
+        private void IsUsingProxy(bool UseProxy)
+        {
+            if (UseProxy)
+            {
+                textProxyAddress.Text = _proxyAddress;
+                textProxyPort.Text = _proxyPort;
+                textProxyUser.Text = _proxyUser;
+                textProxyPass.Text = _proxyPass;
+                checkProxyAuth.IsChecked = _useWin;
+
+                textProxyAddress.IsEnabled = true;
+                textProxyPort.IsEnabled = true;
+                checkProxyAuth.IsEnabled = true;
+                IsUsingWinAuth(IsWinAuthChecked);
+            }
+            else
+            {
+                _proxyAddress = textProxyAddress.Text;
+                _proxyPort = textProxyPort.Text;
+                _proxyUser = textProxyUser.Text;
+                _proxyPass = textProxyPass.Text;
+                _useWin = IsWinAuthChecked;
+
+                textProxyAddress.Text = null;
+                textProxyPort.Text = null;
+                textProxyUser.Text = null;
+                textProxyPass.Text = null;
+                checkProxyAuth.IsChecked = false;
+
+                textProxyAddress.IsEnabled = false;
+                textProxyPort.IsEnabled = false;
+                checkProxyAuth.IsEnabled = false;
+                IsUsingWinAuth(false);
             }
         }
 
@@ -122,19 +161,74 @@ namespace BindHub.Client
             this.buttonSave.Visibility = Visibility.Visible;
         }
 
+        private bool userPassEntered
+        {
+            get
+            {
+                bool userCompleted = !string.IsNullOrWhiteSpace(this.textUser.Text);
+                bool passCompleted = !string.IsNullOrWhiteSpace(this.textPass.Text);
+
+                if (userCompleted && passCompleted)
+                    return true;
+
+                string incompleteMessage = "Please enter your ";
+
+                if (!userCompleted && !passCompleted)
+                    incompleteMessage = incompleteMessage + "username and API key";
+                else
+                {
+                    if (!userCompleted)
+                        incompleteMessage = incompleteMessage + "username";
+                    if (!passCompleted)
+                        incompleteMessage = incompleteMessage + "API key";
+                }
+                MessageBox.Show(incompleteMessage,"Missing information",MessageBoxButton.OK,MessageBoxImage.Exclamation);
+                return false;
+            }
+        }
+
         private void nextClick(object sender, RoutedEventArgs e)
         {
-            bool result = _config.Write(textUser.Text, textPass.Text, textUrl.Text, 5, textProxyAddress.Text, null, textProxyUser.Text, textProxyPass.Text, null);
-            if (result)
-                Connected();
+            if (userPassEntered)
+            {
+                bool result = _config.Write(textUser.Text, textPass.Text, textUrl.Text, 5, textProxyAddress.Text, proxyPort, textProxyUser.Text, textProxyPass.Text, null);
+                if (result)
+                    Connected();
+                else
+                {
+                    MessageBox.Show("Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private int proxyPort
+        {
+            get
+            {
+                try
+                {
+                    return int.Parse(textProxyAddress.Text);
+                }
+                catch (Exception)
+                {
+                    return 0;
+                }
+            }
         }
 
         private void saveClick(object sender, RoutedEventArgs e)
         {
             _config.SetRecords = _dt;
             if (_config.Save)
+            {
                 MessageBox.Show("Config saved");
-            this.Close();
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Error saving","Error",MessageBoxButton.OK,MessageBoxImage.Error);
+            }
+            
         }
     }
 }

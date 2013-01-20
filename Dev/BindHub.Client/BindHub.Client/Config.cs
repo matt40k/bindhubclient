@@ -7,6 +7,7 @@ using System;
 using System.Data;
 using System.IO;
 using System.Xml;
+using System.Net;
 using NLog;
 
 namespace BindHub.Client
@@ -21,12 +22,15 @@ namespace BindHub.Client
         private DataTable _record;
         private DataTable _address;
         private Requestor _requestor;
+        private Proxy _proxy;
 
 
         public Config()
         {
             _ds = new DataSet("bindhub");
             _requestor = new Requestor();
+            _proxy = new Proxy();
+            _proxy.SetUrl = "https://www.bindhub.com/api/";
         }
 
         private string bindHubConfigFile
@@ -58,6 +62,12 @@ namespace BindHub.Client
                     _requestor.SetApiUrl = GetApiUrl;
                     _requestor.SetApiUser = GetApiUser;
                     _requestor.SetApiKey = GetApiKey;
+
+                    bool useProxy = false;
+                    _requestor.UseProxy = useProxy;
+                    if (useProxy)
+                        _requestor.SetWebProxy = _proxy.GetWebProxy(GetConfigProxyAddress, GetConfigProxyPort, GetConfigProxyUser, GetConfigProxyPassword, GetConfigProxyWinAuth);
+
                     return true;
                 }
                 return false;
@@ -77,7 +87,7 @@ namespace BindHub.Client
                 _config.Columns.Add(new DataColumn("proxy_port", typeof(int)));
                 _config.Columns.Add(new DataColumn("proxy_user", typeof(string)));
                 _config.Columns.Add(new DataColumn("proxy_password", typeof(string)));
-                _config.Columns.Add(new DataColumn("proxy_authentication", typeof(string)));
+                _config.Columns.Add(new DataColumn("proxy_winauth", typeof(bool)));
                 return _config;
             }
         }
@@ -123,19 +133,72 @@ namespace BindHub.Client
             DataTable _dt = _requestor.UpdateIp(record, target);
             if (_dt != null)
             {
-                logger.Log(NLog.LogLevel.Error, "test");
-                _record.Merge(_dt);
-            } bool save = Save;
-            logger.Log(NLog.LogLevel.Info, save);
+                foreach (DataRow row in _record.Rows)
+                {
+                    if (row["record"].ToString() == record)
+                        row.SetField("target", target);
+                }
+            }
+            else
+            {
+                logger.Log(NLog.LogLevel.Error, "Update failed");
+            }
+            bool save = Save;
+            logger.Log(NLog.LogLevel.Debug, "Save status" + save);
             return _record;
         }
 
         public void ReloadRecords()
         {
-            // TODO
-            if (_ds.Tables.Contains("entity"))
-                _ds.Tables.Remove("entity");
-            _ds.Tables.Add(bindHubRecord);
+            DataTable configDataTable = _record;
+            DataTable reloadDataTable = CreateNewRecordDataTable;
+
+            DataTable _getDt = _requestor.GetAll;
+            reloadDataTable.Merge(_getDt);
+
+            foreach (DataRow dr in reloadDataTable.Rows)
+            {
+                string reloadId = (string)dr["id"];
+                string reloadRecord = (string)dr["record"];
+                string reloadTarget = (string)dr["target"];
+                string reloadCreated = (string)dr["created"];
+                string reloadLastUpdated = (string)dr["last_updated"];
+
+                bool rowFound = false;
+
+                foreach (DataRow row in configDataTable.Rows)
+                {
+                    if (row["record"].ToString() == reloadRecord)
+                    {
+                        if (row["target"].ToString() != reloadTarget)
+                        {
+                            logger.Log(NLog.LogLevel.Info, reloadRecord + " appears to have changed since last sync");
+                            row.SetField("id", reloadId);
+                            row.SetField("target", reloadTarget);
+                            row.SetField("created", reloadCreated);
+                            row.SetField("last_updated", reloadLastUpdated);
+                        }
+                        rowFound = true;
+                    }
+                }
+
+                if (!rowFound)
+                {
+                    logger.Log(NLog.LogLevel.Info, "Found new record - " + reloadRecord);
+                    DataRow newrow = configDataTable.NewRow();
+                    newrow["id"] = reloadId;
+                    newrow["record"] = reloadRecord;
+                    newrow["target"] = reloadTarget;
+                    newrow["created"] = reloadCreated;
+                    newrow["last_updated"] = reloadLastUpdated;
+                    newrow["sync"] = false;
+                    configDataTable.Rows.Add(newrow);
+                }
+            }
+
+            logger.Log(NLog.LogLevel.Debug, "Reload");
+
+            _record = configDataTable;
         }
 
         private DataTable bindHubRecord
@@ -193,29 +256,37 @@ namespace BindHub.Client
         }
 
         public bool Write(string user, string api_key, string api_url, int? update_frequency, string proxy_address,
-            int? proxy_port, string proxy_user, string proxy_password, int? proxy_authentication)
+            int? proxy_port, string proxy_user, string proxy_password, bool? proxy_authentication)
         {
+            bool useProxy = (!string.IsNullOrEmpty(proxy_address));
+
             DataTable _newConfig = createNewConfig;
             DataRow newrow = _newConfig.NewRow();
             newrow["api_user"] = user;
             newrow["api_key"] = api_key;
             newrow["api_url"] = api_url;
             newrow["update_frequency"] = update_frequency;
-            if (!string.IsNullOrEmpty(proxy_address))
+            if (useProxy)
             {
                 newrow["proxy_address"] = proxy_address;
                 newrow["proxy_port"] = proxy_port;
+                if (!string.IsNullOrEmpty(proxy_user))
+                {
                 newrow["proxy_user"] = proxy_user;
                 newrow["proxy_password"] = proxy_password;
-                newrow["proxy_authentication"] = proxy_authentication;
+                }
+                newrow["proxy_winauth"] = proxy_authentication;
             }
             _newConfig.Rows.Add(newrow);
 
             _config = _newConfig;
+
+            _requestor.UseProxy = useProxy;
+            if (useProxy)
+                _requestor.SetWebProxy = _proxy.GetWebProxy(proxy_address, proxy_port, proxy_user, proxy_password, proxy_authentication);
             _requestor.SetApiUrl = api_url;
             _requestor.SetApiUser = user;
             _requestor.SetApiKey = api_key;
-
 
             try
             {
@@ -298,6 +369,77 @@ namespace BindHub.Client
             get
             {
                 return (string)_config.Rows[0]["api_url"];
+            }
+        }
+
+        public string GetProxyAddress
+        {
+            get
+            {
+                return _proxy.GetProxyAddress;
+            }
+        }
+
+        public string GetProxyPort
+        {
+            get
+            {
+                return _proxy.GetProxyPort;
+            }
+        }
+
+        public int GetIntProxyPort
+        {
+            get
+            {
+                try
+                {
+                    return int.Parse(_proxy.GetProxyPort);
+                }
+                catch (Exception)
+                {
+                    return 0;
+                }
+            }
+        }
+
+        private string GetConfigProxyAddress
+        {
+            get
+            {
+                return (string)_config.Rows[0]["proxy_address"];
+            }
+        }
+
+        private int? GetConfigProxyPort
+        {
+            get
+            {
+                return (int?)_config.Rows[0]["proxy_port"];
+            }
+        }
+
+        private string GetConfigProxyUser
+        {
+            get
+            {
+                return (string)_config.Rows[0]["proxy_user"];
+            }
+        }
+
+        private string GetConfigProxyPassword
+        {
+            get
+            {
+                return (string)_config.Rows[0]["proxy_password"];
+            }
+        }
+
+        private bool? GetConfigProxyWinAuth
+        {
+            get
+            {
+                return (bool?)_config.Rows[0]["proxy_winauth"];
             }
         }
     }

@@ -23,6 +23,7 @@ namespace BindHub.Client
 
         public void Worker()
         {
+            _config.ReloadRecords();
             DataTable _dtRecords = _config.GetRecords;
             string _publicIP = _config.GetPublicIp;
             int freq = _config.GetUpdateFrequency;
@@ -34,11 +35,17 @@ namespace BindHub.Client
                 {
                     if (dr["sync"].ToString().ToLower() == "true")
                     {
+                        string target = dr["target"].ToString();
+                        string record = dr["record"].ToString();
+
                         if (dr["target"].ToString() != _publicIP)
                         {
-                            string record = dr["record"].ToString();
                             logger.Log(NLog.LogLevel.Info, "Updating " + record);
                             _dtRecords = _config.UpdateIp(record, _publicIP);
+                        }
+                        else
+                        {
+                            logger.Log(NLog.LogLevel.Info, record + " up-to-date");
                         }
                     }
                 }
