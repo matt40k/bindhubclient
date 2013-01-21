@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
@@ -15,32 +16,41 @@ namespace BindHub.Client.Monitor
             Application.Run(new SysTrayApp());
         }
 
-        private NotifyIcon  trayIcon;
+        private NotifyIcon trayIcon;
         private ContextMenu trayMenu;
+        private Mutex _mutex;
+        private BackgroundWorker bStatusWorker;
+        private int polling = 30;
 
         public SysTrayApp()
         {
             trayMenu = new ContextMenu();
-            trayMenu.MenuItems.Add("BindHub Client");
+            MenuItem title = new MenuItem("BindHub Client");
+            title.DefaultItem = true;
+            trayMenu.MenuItems.Add(title);
+            trayMenu.MenuItems.Add("-");
+            trayMenu.MenuItems.Add("Status", Status);
             trayMenu.MenuItems.Add("Logs", OpenLogs);
+            trayMenu.MenuItems.Add("-");
             trayMenu.MenuItems.Add("Exit", OnExit);
 
-            trayIcon      = new NotifyIcon();
+            trayIcon = new NotifyIcon();
             trayIcon.Text = "BindHub Client";
             trayIcon.Icon = new Icon(GetType(), "Icon1.ico");
-
             trayIcon.ContextMenu = trayMenu;
-            trayIcon.Visible     = true;
+            trayIcon.Visible = true;
 
-            if (!IsRunning)
-                trayIcon.ShowBalloonTip(1000, "BindHub Client", "BindHub Client is not running", ToolTipIcon.Error);
-            else
+            if (isRunning)
                 trayIcon.ShowBalloonTip(1000, "BindHub Client", "BindHub Client is running", ToolTipIcon.Info);
+            else
+                trayIcon.ShowBalloonTip(1000, "BindHub Client", "BindHub Client is not running", ToolTipIcon.Error);
+
+            Poll();
         }
 
         protected override void OnLoad(EventArgs e)
         {
-            Visible       = false;
+            Visible = false;
             ShowInTaskbar = false;
 
             base.OnLoad(e);
@@ -49,6 +59,23 @@ namespace BindHub.Client.Monitor
         private void OnExit(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void Status(object sender, EventArgs e)
+        {
+            string status;
+            MessageBoxIcon msgBoxIcon;
+            if (isRunning)
+            {
+                status = "running";
+                msgBoxIcon = MessageBoxIcon.Information;
+            }
+            else
+            {
+                status = "not running";
+                msgBoxIcon = MessageBoxIcon.Error;
+            }
+            MessageBox.Show("BindHub client is " + status + ". Please refer to the log file for more information", "BindHub", MessageBoxButtons.OK, msgBoxIcon);
         }
 
         private void OpenLogs(object sender, EventArgs e)
@@ -61,16 +88,17 @@ namespace BindHub.Client.Monitor
             }
             catch (System.Exception OpenLogs_LogsException)
             {
-                
+
             }
         }
 
-        private bool IsRunning
+        private bool isRunning
         {
             get
             {
                 bool aIsNewInstance;
-                Mutex _mutex = new Mutex(true, "BindHub.Client", out aIsNewInstance);
+                _mutex = new Mutex(true, "BindHub.Client", out aIsNewInstance);
+                _mutex.Dispose();
                 return !aIsNewInstance;
             }
         }
@@ -79,11 +107,42 @@ namespace BindHub.Client.Monitor
         {
             if (isDisposing)
             {
-                // Release the icon resource.
                 trayIcon.Dispose();
             }
-
             base.Dispose(isDisposing);
+        }
+
+        private void Poll()
+        {
+            bStatusWorker = new BackgroundWorker();
+            bStatusWorker.WorkerReportsProgress = false;
+            bStatusWorker.WorkerSupportsCancellation = false;
+            bStatusWorker.DoWork += new DoWorkEventHandler(ServiceStatusWorker_DoWork);
+
+            if (bStatusWorker.IsBusy != true)
+            {
+                bStatusWorker.RunWorkerAsync();
+            }
+        }
+
+        private void ServiceStatusWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            bool run = true;
+            if ((bStatusWorker.CancellationPending == true))
+            {
+                run = false;
+            }
+            else
+            {
+                while (run)
+                {
+                    Thread.Sleep(polling * 1000);
+                    if (isRunning)
+                        trayIcon.Icon = new Icon(GetType(), "Icon1.ico");
+                    else
+                        trayIcon.Icon = new Icon(SystemIcons.Application, 40, 40);
+                }
+            }
         }
     }
 }
