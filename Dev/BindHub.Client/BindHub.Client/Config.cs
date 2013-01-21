@@ -102,7 +102,11 @@ namespace BindHub.Client
                 _record.Columns.Add(new DataColumn("target", typeof(string)));
                 _record.Columns.Add(new DataColumn("created", typeof(string)));
                 _record.Columns.Add(new DataColumn("last_updated", typeof(string)));
-                _record.Columns.Add(new DataColumn("sync", typeof(bool)));
+                
+                DataColumn syncColumn = new DataColumn("sync", typeof(bool));
+                syncColumn.DefaultValue = false;
+                _record.Columns.Add(syncColumn);
+
                 return _record;
             }
         }
