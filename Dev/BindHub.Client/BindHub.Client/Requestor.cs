@@ -23,7 +23,8 @@ namespace BindHub.Client
 
         private HttpWebResponse request(Uri url, string method, string postData)
         {
-            WebRequest request = WebRequest.Create(url);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.UserAgent = GetExe.Product + "\\" + GetExe.Version;
             StreamWriter requestWriter;
             request.Method = method;
             request.ContentType = "application/x-www-form-urlencoded";
