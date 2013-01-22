@@ -7,10 +7,10 @@ using System.Resources;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("BindHub Client Monitor")]
-[assembly: AssemblyDescription("BindHub Client Monitor")]
+[assembly: AssemblyDescription("BindHub Client Monito")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("BindHub.com")]
-[assembly: AssemblyProduct("BindHub Client")]
+[assembly: AssemblyProduct("BindHub.WinClient")]
 [assembly: AssemblyCopyright("Copyright © BindHub.com 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -29,6 +29,6 @@ using System.Resources;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.1.0.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.2.0.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]
 [assembly: NeutralResourcesLanguageAttribute("en-GB")]

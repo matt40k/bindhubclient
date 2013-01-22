@@ -191,9 +191,12 @@ namespace BindHub.Client
         {
             if (userPassEntered)
             {
-                bool result = _config.Write(textUser.Text, textPass.Text, textUrl.Text, 5, textProxyAddress.Text, proxyPort, textProxyUser.Text, textProxyPass.Text, null);
+                bool result = _config.Write(textUser.Text, textPass.Text, textUrl.Text, 5, textProxyAddress.Text, proxyPort, textProxyUser.Text, textProxyPass.Text, _useWin);
                 if (result)
+                {
+                    logger.Log(NLog.LogLevel.Debug, "Config set");
                     Connected();
+                }
                 else
                 {
                     MessageBox.Show("Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -207,10 +210,11 @@ namespace BindHub.Client
             {
                 try
                 {
-                    return int.Parse(textProxyAddress.Text);
+                    return int.Parse(textProxyPort.Text);
                 }
-                catch (Exception)
+                catch (Exception proxyPort_Exception)
                 {
+                    logger.Log(NLog.LogLevel.Error, proxyPort_Exception);
                     return 0;
                 }
             }

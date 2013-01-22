@@ -92,34 +92,44 @@ namespace BindHub.Client
             if (port.HasValue)
                 _port = (int)port;
 
+            logger.Log(NLog.LogLevel.Debug, port + " - " + _port);
+
             return getWebProxy(address, _port, user, pass, _useWin);
         }
 
         private WebProxy getWebProxy(string address, int port, string user, string pass, bool useWin)
         {
-            WebProxy _proxy = new WebProxy(address, port);
-            _proxy.UseDefaultCredentials = useWin;
-
-            if (!string.IsNullOrWhiteSpace(user))
+            logger.Log(NLog.LogLevel.Debug, "Address: " + address + " - Port: " + port);
+            WebProxy _proxy = null;
+            try
             {
-                NetworkCredential nc = new NetworkCredential();
+                _proxy = new WebProxy(address, port);
+                _proxy.UseDefaultCredentials = useWin;
 
-                string[] userParts = user.Split('\\');
-                if (userParts.Length == 2)
+                if (!string.IsNullOrWhiteSpace(user))
                 {
-                    nc.UserName = userParts[0];
-                    nc.Domain = userParts[1];
-                }
-                else
-                {
-                    nc.UserName = user;
-                    nc.Domain = null;
-                }
-                nc.Password = pass;
+                    NetworkCredential nc = new NetworkCredential();
 
-                _proxy.Credentials = nc;
+                    string[] userParts = user.Split('\\');
+                    if (userParts.Length == 2)
+                    {
+                        nc.UserName = userParts[0];
+                        nc.Domain = userParts[1];
+                    }
+                    else
+                    {
+                        nc.UserName = user;
+                        nc.Domain = null;
+                    }
+                    nc.Password = pass;
+
+                    _proxy.Credentials = nc;
+                }
             }
-
+            catch (Exception getWebProxy_Exception)
+            {
+                logger.Log(NLog.LogLevel.Error, getWebProxy_Exception);
+            }
             return _proxy;
         }
     }

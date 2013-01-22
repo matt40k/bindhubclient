@@ -259,9 +259,10 @@ namespace BindHub.Client
             }
         }
 
-        public bool Write(string user, string api_key, string api_url, int? update_frequency, string proxy_address,
-            int? proxy_port, string proxy_user, string proxy_password, bool? proxy_authentication)
+        public bool Write(string user, string api_key, string api_url, int update_frequency, string proxy_address,
+            int? proxy_port, string proxy_user, string proxy_password, bool proxy_authentication)
         {
+            logger.Log(NLog.LogLevel.Debug, proxy_port);
             bool useProxy = (!string.IsNullOrEmpty(proxy_address));
 
             DataTable _newConfig = createNewConfig;
@@ -276,10 +277,11 @@ namespace BindHub.Client
                 newrow["proxy_port"] = proxy_port;
                 if (!string.IsNullOrEmpty(proxy_user))
                 {
-                newrow["proxy_user"] = proxy_user;
-                newrow["proxy_password"] = proxy_password;
+                    newrow["proxy_user"] = proxy_user;
+                    newrow["proxy_password"] = proxy_password;
                 }
-                newrow["proxy_winauth"] = proxy_authentication;
+                if ((bool)proxy_authentication)
+                    newrow["proxy_winauth"] = proxy_authentication;
             }
             _newConfig.Rows.Add(newrow);
 
