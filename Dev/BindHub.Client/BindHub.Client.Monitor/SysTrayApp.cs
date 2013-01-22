@@ -2,8 +2,12 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 
 namespace BindHub.Client.Monitor
 {
@@ -83,7 +87,7 @@ namespace BindHub.Client.Monitor
             try
             {
                 Process prc = new Process();
-                prc.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\bindhub";
+                prc.StartInfo.FileName = getLogPath;
                 prc.Start();
             }
             catch (System.Exception OpenLogs_LogsException)
@@ -122,6 +126,27 @@ namespace BindHub.Client.Monitor
             if (bStatusWorker.IsBusy != true)
             {
                 bStatusWorker.RunWorkerAsync();
+            }
+        }
+
+        private string getLogPath
+        {
+            get
+            {
+                LoggingConfiguration config = LogManager.Configuration;
+                FileTarget standardTarget = config.FindTargetByName("System") as FileTarget;
+
+                if (standardTarget != null)
+                {
+                    string expandedFileName = NLog.Layouts.SimpleLayout.Evaluate(standardTarget.FileName.ToString());
+                    expandedFileName = expandedFileName.Replace('/', '\\');
+                    if (expandedFileName.Substring(0, 1) == "'")
+                        expandedFileName = expandedFileName.Substring(1);
+                    if (expandedFileName.Substring(expandedFileName.Length - 1) == "'")
+                        expandedFileName = expandedFileName.Substring(0, expandedFileName.Length - 1);
+                    return expandedFileName;
+                }
+                return null;
             }
         }
 
