@@ -182,7 +182,7 @@ namespace BindHub.Client.Monitor
             try
             {
                 Process process = new Process();
-                process.StartInfo.FileName = "http://bindhubupdaterclient.codeplex.com/";
+                process.StartInfo.FileName = "http://bindhubclient.codeplex.com/";
                 process.Start();
             }
             catch (Exception OpenSite_Exception)
