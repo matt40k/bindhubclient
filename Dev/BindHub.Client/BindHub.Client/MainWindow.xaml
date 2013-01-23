@@ -43,7 +43,7 @@
         <TextBox Name="textUrl" Grid.Column="3" Grid.Row="3" Width="240" Height="25" IsEnabled="False" Text="https://www.bindhub.com/api/" HorizontalAlignment="Left" />
 
         <Label Content="Update frequency:" Grid.Column="2" Grid.Row="4" />
-        <TextBox Name="textUpdateFreq" Grid.Column="3" Grid.Row="4" Width="40" Height="25" HorizontalAlignment="Left" Text="5" />
+        <TextBox Name="textUpdateFreq" Grid.Column="3" Grid.Row="4" Width="40" Height="25" HorizontalAlignment="Left" Text="5" TextChanged="textUpdateFreq_TextChanged"/>
         
         <!-- Proxy Start -->
         <CheckBox Name="checkProxy" Content="Proxy" Grid.Column="2" Grid.Row="5" VerticalAlignment="Center" Unchecked="checkProxy_Checked" Checked="checkProxy_Checked"/>

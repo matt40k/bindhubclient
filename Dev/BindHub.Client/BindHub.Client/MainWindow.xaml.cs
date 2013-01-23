@@ -30,7 +30,7 @@ namespace BindHub.Client
 
         private Config _config;
         private DataTable _dt;
-
+        private string _updateFreq;
         private string _proxyAddress;
         private string _proxyPort;
         private string _proxyUser;
@@ -191,7 +191,7 @@ namespace BindHub.Client
         {
             if (userPassEntered)
             {
-                bool result = _config.Write(textUser.Text, textPass.Text, textUrl.Text, 5, textProxyAddress.Text, proxyPort, textProxyUser.Text, textProxyPass.Text, _useWin);
+                bool result = _config.Write(textUser.Text, textPass.Text, textUrl.Text, updateFreq, textProxyAddress.Text, proxyPort, textProxyUser.Text, textProxyPass.Text, _useWin);
                 if (result)
                 {
                     logger.Log(NLog.LogLevel.Debug, "Config set");
@@ -232,7 +232,40 @@ namespace BindHub.Client
             {
                 MessageBox.Show("Error saving","Error",MessageBoxButton.OK,MessageBoxImage.Error);
             }
-            
+        }
+
+        private int updateFreq
+        {
+            get
+            {
+                int _updateFreq;
+                try
+                {
+                     _updateFreq = int.Parse(textUpdateFreq.Text);
+                }
+                catch (Exception updateFreq_Exception)
+                {
+                    logger.Log(NLog.LogLevel.Error, updateFreq_Exception);
+                    return 5;
+                }
+                logger.Log(NLog.LogLevel.Debug, "updateFreq:" + _updateFreq);
+                if (_updateFreq < 5)
+                    return 5;
+                return _updateFreq;
+            }
+        }
+
+        private void textUpdateFreq_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                _updateFreq = int.Parse(textUpdateFreq.Text).ToString();
+            }
+            catch (Exception textUpdateFreq_TextChanged_Exception)
+            {
+                logger.Log(NLog.LogLevel.Error, "Invalid entry for UpdateFreq entered - " + textUpdateFreq.Text);
+            }
+            textUpdateFreq.Text = _updateFreq;
         }
     }
 }
