@@ -29,7 +29,7 @@ namespace BindHub.Client.Monitor
         public SysTrayApp()
         {
             trayMenu = new ContextMenu();
-            MenuItem title = new MenuItem("BindHub Client");
+            MenuItem title = new MenuItem("BindHub Client", OpenSite);
             title.DefaultItem = true;
             trayMenu.MenuItems.Add(title);
             trayMenu.MenuItems.Add("-");
@@ -45,10 +45,15 @@ namespace BindHub.Client.Monitor
             trayIcon.Visible = true;
 
             if (isRunning)
+            {
+                trayIcon.Icon = new Icon(GetType(), "Icon1.ico");
                 trayIcon.ShowBalloonTip(1000, "BindHub Client", "BindHub Client is running", ToolTipIcon.Info);
+            }
             else
+            {
+                trayIcon.Icon = new Icon(GetType(), "Icon2.ico");
                 trayIcon.ShowBalloonTip(1000, "BindHub Client", "BindHub Client is not running", ToolTipIcon.Error);
-
+            }
             Poll();
         }
 
@@ -71,11 +76,13 @@ namespace BindHub.Client.Monitor
             MessageBoxIcon msgBoxIcon;
             if (isRunning)
             {
+                trayIcon.Icon = new Icon(GetType(), "Icon1.ico");
                 status = "running";
                 msgBoxIcon = MessageBoxIcon.Information;
             }
             else
             {
+                trayIcon.Icon = new Icon(GetType(), "Icon2.ico");
                 status = "not running";
                 msgBoxIcon = MessageBoxIcon.Error;
             }
@@ -165,8 +172,22 @@ namespace BindHub.Client.Monitor
                     if (isRunning)
                         trayIcon.Icon = new Icon(GetType(), "Icon1.ico");
                     else
-                        trayIcon.Icon = new Icon(SystemIcons.Application, 40, 40);
+                        trayIcon.Icon = new Icon(GetType(), "Icon2.ico");
                 }
+            }
+        }
+
+        private void OpenSite(object sender, EventArgs e)
+        {
+            try
+            {
+                Process process = new Process();
+                process.StartInfo.FileName = "http://bindhubupdaterclient.codeplex.com/";
+                process.Start();
+            }
+            catch (Exception OpenSite_Exception)
+            {
+                
             }
         }
     }

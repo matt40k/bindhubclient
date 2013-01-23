@@ -7,13 +7,14 @@ using System.Resources;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("BindHub Client Monitor")]
-[assembly: AssemblyDescription("BindHub Client Monito")]
+[assembly: AssemblyDescription("BindHub Client Monitor")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("BindHub.com")]
 [assembly: AssemblyProduct("BindHub.WinClient")]
 [assembly: AssemblyCopyright("Copyright © BindHub.com 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
+
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
 // COM, set the ComVisible attribute to true on that type.
