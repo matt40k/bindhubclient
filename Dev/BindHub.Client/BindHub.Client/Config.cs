@@ -9,6 +9,8 @@ using System.IO;
 using System.Xml;
 using System.Net;
 using NLog;
+using NLog.Config;
+using NLog.Targets;
 
 namespace BindHub.Client
 {
@@ -37,17 +39,22 @@ namespace BindHub.Client
         {
             get
             {
-                if (!Directory.Exists(userLocalAppDir))
-                    Directory.CreateDirectory(userLocalAppDir);
-                return Path.Combine(userLocalAppDir, bindhubConfigName);
-            }
-        }
+                LoggingConfiguration config = LogManager.Configuration;
+                FileTarget standardTarget = config.FindTargetByName("System") as FileTarget;
+                string expandedFileName = null;
 
-        private string userLocalAppDir
-        {
-            get
-            {
-                return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\bindhub";
+                if (standardTarget != null)
+                {
+                    expandedFileName = NLog.Layouts.SimpleLayout.Evaluate(standardTarget.FileName.ToString());
+                    expandedFileName = expandedFileName.Replace('/', '\\');
+                    if (expandedFileName.Substring(0, 1) == "'")
+                        expandedFileName = expandedFileName.Substring(1);
+                    if (expandedFileName.Substring(expandedFileName.Length - 1) == "'")
+                        expandedFileName = expandedFileName.Substring(0, expandedFileName.Length - 1);
+                }
+                string appDir = Path.GetDirectoryName(expandedFileName);
+                logger.Log(NLog.LogLevel.Debug, appDir);
+                return Path.Combine(appDir, bindhubConfigName);
             }
         }
 
