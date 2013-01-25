@@ -1,6 +1,6 @@
 ﻿namespace BindHub.Client.Service
 {
-    partial class SampleService
+    partial class Service
     {
         /// <summary> 
         /// Required designer variable.

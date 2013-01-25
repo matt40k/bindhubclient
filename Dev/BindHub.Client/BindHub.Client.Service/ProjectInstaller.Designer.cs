@@ -1,4 +1,12 @@
-﻿namespace BindHub.Client.Service
+﻿/*
+ * Developer : Matt Smith (matt@matt40k.co.uk)
+ * All code (c) Matthew Smith all rights reserved
+ */
+
+using System.Configuration.Install;
+using System.ServiceProcess;
+
+namespace BindHub.Client.Service
 {
     partial class ProjectInstaller
     {
@@ -28,24 +36,25 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.serviceProcessInstaller1 = new System.ServiceProcess.ServiceProcessInstaller();
-            this.serviceInstaller1 = new System.ServiceProcess.ServiceInstaller();
+            this.serviceProcessInstaller1 = new ServiceProcessInstaller();
+            this.serviceInstaller1 = new ServiceInstaller();
             // 
             // serviceProcessInstaller1
             // 
-            this.serviceProcessInstaller1.Account = System.ServiceProcess.ServiceAccount.LocalService;
+            this.serviceProcessInstaller1.Account = ServiceAccount.LocalService;
             this.serviceProcessInstaller1.Password = null;
             this.serviceProcessInstaller1.Username = null;
             // 
             // serviceInstaller1
             // 
-            this.serviceInstaller1.Description = "All-In-One Code Framework Windows Service Sample";
-            this.serviceInstaller1.DisplayName = "BindHub.Client.Service Sample Service";
-            this.serviceInstaller1.ServiceName = "BindHub.Client.Service";
+            this.serviceInstaller1.Description = "BindHub Client Service";
+            this.serviceInstaller1.DisplayName = "BindHub Client Service";
+            this.serviceInstaller1.ServiceName = "BindHubClientSvc";
+            this.serviceInstaller1.StartType = ServiceStartMode.Automatic;
             // 
             // ProjectInstaller
             // 
-            this.Installers.AddRange(new System.Configuration.Install.Installer[] {
+            this.Installers.AddRange(new Installer[] {
             this.serviceProcessInstaller1,
             this.serviceInstaller1});
 

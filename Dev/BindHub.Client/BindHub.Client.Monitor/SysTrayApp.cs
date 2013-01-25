@@ -27,39 +27,48 @@ namespace BindHub.Client.Monitor
 
         private NotifyIcon trayIcon;
         private ContextMenu trayMenu;
-        private Mutex _mutex;
         private BackgroundWorker bStatusWorker;
         private int polling = 30;
 
         public SysTrayApp()
         {
-            trayMenu = new ContextMenu();
-            MenuItem title = new MenuItem("BindHub Client", OpenSite);
-            title.DefaultItem = true;
-            trayMenu.MenuItems.Add(title);
-            trayMenu.MenuItems.Add("-");
-            trayMenu.MenuItems.Add("Status", Status);
-            trayMenu.MenuItems.Add("Logs", OpenLogs);
-            trayMenu.MenuItems.Add("-");
-            trayMenu.MenuItems.Add("Exit", OnExit);
-
-            trayIcon = new NotifyIcon();
-            trayIcon.Text = "BindHub Client";
-            trayIcon.Icon = new Icon(GetType(), "Icon1.ico");
-            trayIcon.ContextMenu = trayMenu;
-            trayIcon.Visible = true;
-
-            if (isRunning)
+            bool freeToRun;
+            string safeName = "Local\\BindHubClientMonitorMutex";
+            Mutex m = new Mutex(true, safeName, out freeToRun);
+            if (freeToRun)
             {
+                trayMenu = new ContextMenu();
+                MenuItem title = new MenuItem("BindHub Client", OpenSite);
+                title.DefaultItem = true;
+                trayMenu.MenuItems.Add(title);
+                trayMenu.MenuItems.Add("-");
+                trayMenu.MenuItems.Add("Status", Status);
+                trayMenu.MenuItems.Add("Logs", OpenLogs);
+                trayMenu.MenuItems.Add("-");
+                trayMenu.MenuItems.Add("Exit", OnExit);
+
+                trayIcon = new NotifyIcon();
+                trayIcon.Text = "BindHub Client";
                 trayIcon.Icon = new Icon(GetType(), "Icon1.ico");
-                trayIcon.ShowBalloonTip(1000, "BindHub Client", "BindHub Client is running", ToolTipIcon.Info);
+                trayIcon.ContextMenu = trayMenu;
+                trayIcon.Visible = true;
+
+                if (isRunning)
+                {
+                    trayIcon.Icon = new Icon(GetType(), "Icon1.ico");
+                    trayIcon.ShowBalloonTip(1000, "BindHub Client", "BindHub Client is running", ToolTipIcon.Info);
+                }
+                else
+                {
+                    trayIcon.Icon = new Icon(GetType(), "Icon2.ico");
+                    trayIcon.ShowBalloonTip(1000, "BindHub Client", "BindHub Client is not running", ToolTipIcon.Error);
+                }
+                Poll();
             }
             else
             {
-                trayIcon.Icon = new Icon(GetType(), "Icon2.ico");
-                trayIcon.ShowBalloonTip(1000, "BindHub Client", "BindHub Client is not running", ToolTipIcon.Error);
+                Environment.Exit(5);
             }
-            Poll();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -112,10 +121,18 @@ namespace BindHub.Client.Monitor
         {
             get
             {
-                bool aIsNewInstance;
-                _mutex = new Mutex(true, "BindHub.Client", out aIsNewInstance);
-                _mutex.Dispose();
-                return !aIsNewInstance;
+                try
+                {
+                    bool freeToRun;
+                    string safeName = "Global\\BindHubClientMutex";
+                    using (Mutex m = new Mutex(true, safeName, out freeToRun))
+                        m.Close();
+                    return !freeToRun;
+                }
+                catch (Exception)
+                {
+                    return true;
+                }
             }
         }
 

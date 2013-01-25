@@ -1,15 +1,17 @@
-﻿using System.ServiceProcess;
+﻿/*
+ * Developer : Matt Smith (matt@matt40k.co.uk)
+ * All code (c) Matthew Smith all rights reserved
+ */
+
+using System.ServiceProcess;
 
 namespace BindHub.Client.Service
 {
     static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
         static void Main()
         {
-            ServiceBase service = new SampleService();
+            ServiceBase service = new Service();
             ServiceBase.Run(service);
         }
     }

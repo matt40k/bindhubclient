@@ -19,27 +19,38 @@ namespace BindHub.Client
         [STAThread]
         static void Main()
         {
-            bool aIsNewInstance = false;
+            bool freeToRun;
 
-            Mutex _mutex = new Mutex(true, "BindHub.Client", out aIsNewInstance);
-            if (!aIsNewInstance)
+            try
+            {
+                string safeName = "Global\\BindHubClientMutex";
+                using (Mutex m = new Mutex(true, safeName, out freeToRun))
+                    if (freeToRun)
+                    {
+                        Config _config = new Config();
+                        if (!_config.DoesConfigExist)
+                        {
+                            logger.Log(NLog.LogLevel.Info, "Config not found, running config ui");
+                            Application application = new Application();
+                            application.Run(new MainWindow(_config));
+                        }
+                        if (_config.DoesConfigExist)
+                        {
+                            logger.Log(NLog.LogLevel.Info, "Config found");
+                            Updater _updater = new Updater(_config);
+                            _updater.Worker();
+                        }
+                    }
+                    else
+                    {
+                        logger.Log(NLog.LogLevel.Error, "Application is already running!");
+                        Environment.Exit(5);
+                    }
+            }
+            catch (Exception)
             {
                 logger.Log(NLog.LogLevel.Error, "Application is already running!");
                 Environment.Exit(5);
-            }
-
-            Config _config = new Config();
-            if (!_config.DoesConfigExist)
-            {
-                logger.Log(NLog.LogLevel.Info, "Config not found, running config ui");
-                Application application = new Application();
-                application.Run(new MainWindow(_config));
-            }
-            if (_config.DoesConfigExist)
-            {
-                logger.Log(NLog.LogLevel.Info, "Config found");
-                Updater _updater = new Updater(_config);
-                _updater.Worker();
             }
         }
     }
