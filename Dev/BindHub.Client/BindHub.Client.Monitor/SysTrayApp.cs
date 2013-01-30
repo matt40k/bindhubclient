@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.ServiceProcess;
 using System.Threading;
 using System.Windows.Forms;
 using NLog;
@@ -88,19 +89,38 @@ namespace BindHub.Client.Monitor
         {
             string status;
             MessageBoxIcon msgBoxIcon;
+            MessageBoxButtons msgBoxButtons;
             if (isRunning)
             {
                 trayIcon.Icon = new Icon(GetType(), "Icon1.ico");
-                status = "running";
+                status = "running.";
                 msgBoxIcon = MessageBoxIcon.Information;
+                msgBoxButtons = MessageBoxButtons.OK;
             }
             else
             {
                 trayIcon.Icon = new Icon(GetType(), "Icon2.ico");
-                status = "not running";
+                status = "not running.\nWould you like to start the client?";
                 msgBoxIcon = MessageBoxIcon.Error;
+                msgBoxButtons = MessageBoxButtons.YesNo;
             }
-            MessageBox.Show("BindHub client is " + status + ". Please refer to the log file for more information", "BindHub", MessageBoxButtons.OK, msgBoxIcon);
+            DialogResult dialogResult = MessageBox.Show("BindHub client is " + status + "\n\nPlease refer to the log file for more information", "BindHub", msgBoxButtons, msgBoxIcon);
+            if (dialogResult == DialogResult.Yes)
+            {
+                if (!IsServiceMode)
+                {
+                    Process prc = new Process();
+                    prc.StartInfo.FileName = "services.msc";
+                    prc.Start();
+                }
+                else
+                {
+                    Process prc = new Process();
+                    prc.StartInfo.FileName = "BindHub.Client.exe";
+                    prc.Start();
+                }
+            }
+
         }
 
         private void OpenLogs(object sender, EventArgs e)
@@ -210,6 +230,34 @@ namespace BindHub.Client.Monitor
             catch (Exception OpenSite_Exception)
             {
                 
+            }
+        }
+
+        private bool IsServiceMode
+        {
+            get
+            {
+                LoggingConfiguration config = LogManager.Configuration;
+                FileTarget standardTarget = config.FindTargetByName("System") as FileTarget;
+                bool multiConfig = standardTarget.FileName.ToString().Contains("${specialfolder:folder=CommonApplicationData}");
+                if (multiConfig)
+                {
+                    return IsService;
+                }
+                return false;
+            }
+        }
+
+        private bool IsService
+        {
+            get
+            {
+                foreach (ServiceController sc in ServiceController.GetServices())
+                {
+                    if (sc.ServiceName == "BindHubClientSvc")
+                        return true;
+                }
+                return false;
             }
         }
     }

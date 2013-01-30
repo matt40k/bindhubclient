@@ -13,7 +13,8 @@ namespace BindHub.Client
     {
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private ServiceController service = new ServiceController("BindHubClientSvc");
+        protected static string serviceName = "BindHubClientSvc";
+        private ServiceController service = new ServiceController(serviceName);
         private TimeSpan timeout = TimeSpan.FromMilliseconds(300);
 
         private void StartService()
@@ -60,6 +61,19 @@ namespace BindHub.Client
                 default:
                     ReloadService();
                     break;
+            }
+        }
+
+        public bool IsService
+        {
+            get
+            {
+                foreach (ServiceController sc in ServiceController.GetServices())
+                {
+                    if (sc.ServiceName == serviceName)
+                        return true;
+                }
+                return false;
             }
         }
     }

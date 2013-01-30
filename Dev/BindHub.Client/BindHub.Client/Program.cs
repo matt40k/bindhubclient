@@ -41,6 +41,11 @@ namespace BindHub.Client
                             if (_config.DoesConfigExist)
                             {
                                 logger.Log(NLog.LogLevel.Info, "Config found");
+
+                                if (_config.IsServiceMode)
+                                {
+                                    logger.Log(NLog.LogLevel.Info, "Service Mode");
+                                }
                                 Updater _updater = new Updater(_config);
                                 _updater.Worker();
                             }
@@ -51,9 +56,9 @@ namespace BindHub.Client
                             Environment.Exit(5);
                         }
                 }
-                catch (Exception)
+                catch (Exception Main_Exception)
                 {
-                    logger.Log(NLog.LogLevel.Error, "Application is already running!");
+                    logger.Log(NLog.LogLevel.Error, Main_Exception);
                     Environment.Exit(5);
                 }
             }

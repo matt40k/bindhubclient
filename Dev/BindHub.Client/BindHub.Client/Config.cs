@@ -25,7 +25,7 @@ namespace BindHub.Client
         private DataTable _address;
         private Requestor _requestor;
         private Proxy _proxy;
-
+        private SvcMan svc;
 
         public Config()
         {
@@ -475,7 +475,13 @@ namespace BindHub.Client
             {
                 LoggingConfiguration config = LogManager.Configuration;
                 FileTarget standardTarget = config.FindTargetByName("System") as FileTarget;
-                return standardTarget.FileName.ToString().ToLower().Contains("${specialfolder:folder=CommonApplicationData}");
+                bool multiConfig = standardTarget.FileName.ToString().Contains("${specialfolder:folder=CommonApplicationData}");
+                if (multiConfig)
+                {
+                    svc = new SvcMan();
+                    return svc.IsService;
+                }
+                return false;
             }
         }
     }
