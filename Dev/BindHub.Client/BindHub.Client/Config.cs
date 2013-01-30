@@ -455,5 +455,28 @@ namespace BindHub.Client
                 return (bool?)_config.Rows[0]["proxy_winauth"];
             }
         }
+
+        public void DeleteConfig()
+        {
+            try
+            {
+                if (File.Exists(bindHubConfigFile))
+                    File.Delete(bindHubConfigFile);
+            }
+            catch (Exception DeleteConfig_Exception)
+            {
+                logger.Log(NLog.LogLevel.Error, DeleteConfig_Exception);
+            }
+        }
+
+        public bool IsServiceMode
+        {
+            get
+            {
+                LoggingConfiguration config = LogManager.Configuration;
+                FileTarget standardTarget = config.FindTargetByName("System") as FileTarget;
+                return standardTarget.FileName.ToString().ToLower().Contains("${specialfolder:folder=CommonApplicationData}");
+            }
+        }
     }
 }

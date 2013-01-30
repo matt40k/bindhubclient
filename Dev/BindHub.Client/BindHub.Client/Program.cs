@@ -17,40 +17,50 @@ namespace BindHub.Client
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             bool freeToRun;
 
-            try
+
+            if (args.Length == 0)
             {
-                string safeName = "Global\\BindHubClientMutex";
-                using (Mutex m = new Mutex(true, safeName, out freeToRun))
-                    if (freeToRun)
-                    {
-                        Config _config = new Config();
-                        if (!_config.DoesConfigExist)
+
+                try
+                {
+                    string safeName = "Global\\BindHubClientMutex";
+                    using (Mutex m = new Mutex(true, safeName, out freeToRun))
+                        if (freeToRun)
                         {
-                            logger.Log(NLog.LogLevel.Info, "Config not found, running config ui");
-                            Application application = new Application();
-                            application.Run(new MainWindow(_config));
+                            Config _config = new Config();
+                            if (!_config.DoesConfigExist)
+                            {
+                                logger.Log(NLog.LogLevel.Info, "Config not found, running config ui");
+                                Application application = new Application();
+                                application.Run(new MainWindow(_config));
+                            }
+                            if (_config.DoesConfigExist)
+                            {
+                                logger.Log(NLog.LogLevel.Info, "Config found");
+                                Updater _updater = new Updater(_config);
+                                _updater.Worker();
+                            }
                         }
-                        if (_config.DoesConfigExist)
+                        else
                         {
-                            logger.Log(NLog.LogLevel.Info, "Config found");
-                            Updater _updater = new Updater(_config);
-                            _updater.Worker();
+                            logger.Log(NLog.LogLevel.Error, "Application is already running!");
+                            Environment.Exit(5);
                         }
-                    }
-                    else
-                    {
-                        logger.Log(NLog.LogLevel.Error, "Application is already running!");
-                        Environment.Exit(5);
-                    }
+                }
+                catch (Exception)
+                {
+                    logger.Log(NLog.LogLevel.Error, "Application is already running!");
+                    Environment.Exit(5);
+                }
             }
-            catch (Exception)
+            else
             {
-                logger.Log(NLog.LogLevel.Error, "Application is already running!");
-                Environment.Exit(5);
+                Args _args = new Args(args);
+
             }
         }
     }
