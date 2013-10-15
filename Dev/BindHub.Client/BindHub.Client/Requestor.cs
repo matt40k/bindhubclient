@@ -92,8 +92,7 @@ namespace BindHub.Client
                     result = reader.ReadToEnd();
                 }
                 //logger.Log(NLog.LogLevel.Debug, result);
-
-                XmlDocument doc = (XmlDocument)JsonConvert.DeserializeXmlNode(result);
+                XmlDocument doc = (XmlDocument)JsonConvert.DeserializeXmlNode(result, "entities");
                 XmlReader xmlReader = new XmlNodeReader(doc);
                 ds.ReadXml(xmlReader);
 
