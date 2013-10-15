@@ -53,7 +53,7 @@ namespace BindHub.Client
                         expandedFileName = expandedFileName.Substring(0, expandedFileName.Length - 1);
                 }
                 string appDir = Path.GetDirectoryName(expandedFileName);
-                logger.Log(NLog.LogLevel.Debug, appDir);
+                //logger.Log(NLog.LogLevel.Debug, appDir);
                 return Path.Combine(appDir, bindhubConfigName);
             }
         }

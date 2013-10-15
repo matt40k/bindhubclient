@@ -65,7 +65,6 @@ namespace BindHub.Client
             else
             {
                 Args _args = new Args(args);
-
             }
         }
     }

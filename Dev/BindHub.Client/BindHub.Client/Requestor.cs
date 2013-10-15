@@ -7,7 +7,10 @@ using System;
 using System.Data;
 using System.IO;
 using System.Net;
+using System.Text;
+using System.Xml;
 using NLog;
+using Newtonsoft.Json;
 
 namespace BindHub.Client
 {
@@ -51,14 +54,24 @@ namespace BindHub.Client
             get
             {
                 DataSet ds = new DataSet("bindhub");
-                Uri url = new Uri(_apiUrl + "ip.xml");
+                string result = null;
+                Uri url = new Uri(_apiUrl + "ip.json");
                 HttpWebResponse response = request(url, "GET", null);
                 logger.Log(NLog.LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
-                ds.ReadXml(response.GetResponseStream());
 
+                using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
+                {
+                    result = reader.ReadToEnd();
+                }
+                //logger.Log(NLog.LogLevel.Debug, result);
+
+                XmlDocument doc = (XmlDocument)JsonConvert.DeserializeXmlNode(result);
+                XmlReader xmlReader = new XmlNodeReader(doc);
+                ds.ReadXml(xmlReader);
                 if (ds.Tables.Contains("address"))
+                {
                     return ds.Tables["address"];
-
+                }
                 return null;
             }
         }
@@ -68,14 +81,29 @@ namespace BindHub.Client
             get
             {
                 DataSet ds = new DataSet("bindhub");
-                Uri url = new Uri(_apiUrl + "record.xml");
+                string result = null;
+                Uri url = new Uri(_apiUrl + "record.json");
                 string postData = "user=" + _apiUser + "&key=" + _apiKey;
                 HttpWebResponse response = request(url, "POST", postData);
                 logger.Log(NLog.LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
-                ds.ReadXml(response.GetResponseStream());
 
-                if (ds.Tables.Contains("entity"))
-                    return ds.Tables["entity"];
+                using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
+                {
+                    result = reader.ReadToEnd();
+                }
+                //logger.Log(NLog.LogLevel.Debug, result);
+
+                XmlDocument doc = (XmlDocument)JsonConvert.DeserializeXmlNode(result);
+                XmlReader xmlReader = new XmlNodeReader(doc);
+                ds.ReadXml(xmlReader);
+
+                /*
+                foreach (DataTable table in ds.Tables)
+                    System.Windows.MessageBox.Show(table.TableName);
+                 */
+
+                if (ds.Tables.Contains("entities"))
+                    return ds.Tables["entities"];
 
                 return null;
             }
@@ -84,16 +112,26 @@ namespace BindHub.Client
         public DataTable UpdateIp(string record, string target)
         {
             DataSet ds = new DataSet("bindhub");
-            Uri url = new Uri(_apiUrl + "record/update.xml");
+            string result = null;
+            Uri url = new Uri(_apiUrl + "record/update.json");
             string postData = "user=" + _apiUser + "&key=" + _apiKey + "&record=" + record + "&target=" + target;
             HttpWebResponse response = request(url, "POST", postData);
             logger.Log(NLog.LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
-            ds.ReadXml(response.GetResponseStream());
+
+            using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
+            {
+                result = reader.ReadToEnd();
+            }
+            //logger.Log(NLog.LogLevel.Debug, result);
+
+            XmlDocument doc = (XmlDocument)JsonConvert.DeserializeXmlNode(result);
+            XmlReader xmlReader = new XmlNodeReader(doc);
+            ds.ReadXml(xmlReader);
 
             if (ds.Tables.Contains("bindhub"))
-                ds.Tables["bindhub"].TableName = "entity";
-            if (ds.Tables.Contains("entity"))
-                return ds.Tables["entity"];
+                ds.Tables["bindhub"].TableName = "entities";
+            if (ds.Tables.Contains("entities"))
+                return ds.Tables["entities"];
 
             return null;
         }
