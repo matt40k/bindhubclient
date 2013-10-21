@@ -25,6 +25,7 @@ namespace BindHub.Client.Library
         {
             get
             {
+                string prodName;
                 object[] attributes =
                     System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(
                         typeof (AssemblyProductAttribute), false);
@@ -33,10 +34,16 @@ namespace BindHub.Client.Library
                     var productAttribute = (AssemblyProductAttribute)attributes[0];
                     if (productAttribute.Product != "")
                     {
-                        return productAttribute.Product;
+                        prodName = productAttribute.Product;
+                        if (prodName.Length > 9)
+                            prodName = prodName.Substring(0, (prodName.Length - 8));
+                        return prodName;
                     }
                 }
-                return Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+                prodName = Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+                if (prodName.Length > 9)
+                    prodName = prodName.Substring(0, (prodName.Length - 8));
+                return prodName;
             }
         }
 
