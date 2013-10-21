@@ -1,27 +1,32 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Windows Desktop
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BindHub.Client", "BindHub.Client\BindHub.Client.csproj", "{BC040D4C-ECBF-437E-9950-B2EA76DCF6C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BindHub.Client.UI", "BindHub.Client.UI\BindHub.Client.UI.csproj", "{BC040D4C-ECBF-437E-9950-B2EA76DCF6C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BindHub.Client.Monitor", "BindHub.Client.Monitor\BindHub.Client.Monitor.csproj", "{A98E4E43-F82D-4D49-B21D-539316E75894}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BindHub.Client.Service", "BindHub.Client.Service\BindHub.Client.Service.csproj", "{E2002579-D3F2-4F64-81D3-1655932F8821}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BindHub.Client.Library", "BindHub.Client.Library\BindHub.Client.Library.csproj", "{BD4B4A07-D39B-4630-8C77-DA15216CCCCF}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 4
+		SccNumberOfProjects = 5
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs17
 		SccLocalPath0 = .
-		SccProjectUniqueName1 = BindHub.Client\\BindHub.Client.csproj
-		SccProjectName1 = BindHub.Client
-		SccLocalPath1 = BindHub.Client
-		SccProjectUniqueName2 = BindHub.Client.Monitor\\BindHub.Client.Monitor.csproj
-		SccProjectName2 = BindHub.Client.Monitor
-		SccLocalPath2 = BindHub.Client.Monitor
-		SccProjectUniqueName3 = BindHub.Client.Service\\BindHub.Client.Service.csproj
-		SccProjectName3 = BindHub.Client.Service
-		SccLocalPath3 = BindHub.Client.Service
+		SccProjectUniqueName1 = BindHub.Client.Monitor\\BindHub.Client.Monitor.csproj
+		SccProjectName1 = BindHub.Client.Monitor
+		SccLocalPath1 = BindHub.Client.Monitor
+		SccProjectUniqueName2 = BindHub.Client.Service\\BindHub.Client.Service.csproj
+		SccProjectName2 = BindHub.Client.Service
+		SccLocalPath2 = BindHub.Client.Service
+		SccProjectUniqueName3 = BindHub.Client.UI\\BindHub.Client.UI.csproj
+		SccProjectName3 = BindHub.Client.UI
+		SccLocalPath3 = BindHub.Client.UI
+		SccProjectUniqueName4 = BindHub.Client.Library\\BindHub.Client.Library.csproj
+		SccProjectName4 = BindHub.Client.Library
+		SccLocalPath4 = BindHub.Client.Library
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +45,10 @@ Global
 		{E2002579-D3F2-4F64-81D3-1655932F8821}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2002579-D3F2-4F64-81D3-1655932F8821}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2002579-D3F2-4F64-81D3-1655932F8821}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD4B4A07-D39B-4630-8C77-DA15216CCCCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD4B4A07-D39B-4630-8C77-DA15216CCCCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD4B4A07-D39B-4630-8C77-DA15216CCCCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD4B4A07-D39B-4630-8C77-DA15216CCCCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

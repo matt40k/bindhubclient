@@ -92,9 +92,9 @@
     <EmbeddedResource Include="Service.resx" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BindHub.Client\BindHub.Client.csproj">
+    <ProjectReference Include="..\BindHub.Client.UI\BindHub.Client.UI.csproj">
       <Project>{bc040d4c-ecbf-437e-9950-b2ea76dcf6c2}</Project>
-      <Name>BindHub.Client</Name>
+      <Name>BindHub.Client.UI</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
