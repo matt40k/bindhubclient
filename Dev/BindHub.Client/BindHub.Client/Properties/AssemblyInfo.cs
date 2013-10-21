@@ -1,21 +1,36 @@
-﻿/*
- * Developer : Matt Smith (matt@matt40k.co.uk)
- * All code (c) Matthew Smith all rights reserved
- */
-
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Resources;
 
-[assembly: AssemblyTitle("BindHub Client")]
-[assembly: AssemblyDescription("BindHub Client")]
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("BindHub.Client")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("BindHub.com")]
-[assembly: AssemblyProduct("BindHub.WinClient")]
-[assembly: AssemblyCopyright("Copyright © BindHub.com 2013")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("BindHub.Client")]
+[assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("1.4.0.0")]
-[assembly: AssemblyFileVersion("1.4.0.0")]
-[assembly: NeutralResourcesLanguageAttribute("en-GB")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("4e68a61c-b429-431a-b151-2e8307fcf242")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
