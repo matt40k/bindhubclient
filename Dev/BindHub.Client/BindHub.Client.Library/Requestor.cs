@@ -9,24 +9,148 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Xml;
-using NLog;
 using Newtonsoft.Json;
+using NLog;
 
 namespace BindHub.Client.Library
 {
     public class Requestor
     {
-        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private string _apiUrl;
         private string _apiKey;
+        private string _apiUrl;
         private string _apiUser;
         private WebProxy _proxy;
         private bool useProxy;
 
+        /// <summary>
+        /// Queries the BindHub service for your current (public) IP
+        /// </summary>
+        public DataTable GetIp
+        {
+            get
+            {
+                var ds = new DataSet("bindhub");
+                string result = null;
+                var url = new Uri(_apiUrl + "ip.json");
+                HttpWebResponse response = request(url, "GET", null);
+                logger.Log(LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
+
+                using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
+                {
+                    result = reader.ReadToEnd();
+                }
+                //logger.Log(NLog.LogLevel.Debug, result);
+
+                XmlDocument doc = JsonConvert.DeserializeXmlNode(result);
+                XmlReader xmlReader = new XmlNodeReader(doc);
+                ds.ReadXml(xmlReader);
+                if (ds.Tables.Contains("address"))
+                {
+                    return ds.Tables["address"];
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Queries the BindHub service for your  list of records
+        /// </summary>
+        public DataTable GetAll
+        {
+            get
+            {
+                var ds = new DataSet("bindhub");
+                string result = null;
+                var url = new Uri(_apiUrl + "record.json");
+                string postData = "user=" + _apiUser + "&key=" + _apiKey;
+                HttpWebResponse response = request(url, "POST", postData);
+                logger.Log(LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
+
+                using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
+                {
+                    result = reader.ReadToEnd();
+                }
+                //logger.Log(NLog.LogLevel.Debug, result);
+                XmlDocument doc = JsonConvert.DeserializeXmlNode(result, "entities");
+                XmlReader xmlReader = new XmlNodeReader(doc);
+                ds.ReadXml(xmlReader);
+
+                /*
+                foreach (DataTable table in ds.Tables)
+                    System.Windows.MessageBox.Show(table.TableName);
+                 */
+
+                if (ds.Tables.Contains("entities"))
+                    return ds.Tables["entities"];
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Sets the BindHub API url
+        /// </summary>
+        public string SetApiUrl
+        {
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                    _apiUrl = value;
+            }
+        }
+
+        /// <summary>
+        /// Sets the BindHub API key
+        /// </summary>
+        public string SetApiKey
+        {
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                    _apiKey = value;
+            }
+        }
+
+        /// <summary>
+        /// Sets the BindHub API Username
+        /// </summary>
+        public string SetApiUser
+        {
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                    _apiUser = value;
+            }
+        }
+
+        /// <summary>
+        /// Sets the WebProxy
+        /// </summary>
+        public WebProxy SetWebProxy
+        {
+            set { _proxy = value; }
+        }
+
+        /// <summary>
+        /// Sets if the WebProxy is used
+        /// </summary>
+        public bool UseProxy
+        {
+            set { useProxy = value; }
+        }
+
+        /// <summary>
+        /// Returns the HttpWebResponse to the request
+        /// </summary>
+        /// <param name="url">URL to connect to</param>
+        /// <param name="method">POST\GET</param>
+        /// <param name="postData">Data to post</param>
+        /// <returns></returns>
         private HttpWebResponse request(Uri url, string method, string postData)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            var request = (HttpWebRequest) WebRequest.Create(url);
             request.UserAgent = GetExe.Product + "\\" + GetExe.Version;
             StreamWriter requestWriter;
             request.Method = method;
@@ -46,76 +170,23 @@ namespace BindHub.Client.Library
                     requestWriter.Write(postData);
                 }
             }
-            return (HttpWebResponse)request.GetResponse();
+            return (HttpWebResponse) request.GetResponse();
         }
 
-        public DataTable GetIp
-        {
-            get
-            {
-                DataSet ds = new DataSet("bindhub");
-                string result = null;
-                Uri url = new Uri(_apiUrl + "ip.json");
-                HttpWebResponse response = request(url, "GET", null);
-                logger.Log(NLog.LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
-
-                using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
-                {
-                    result = reader.ReadToEnd();
-                }
-                //logger.Log(NLog.LogLevel.Debug, result);
-
-                XmlDocument doc = (XmlDocument)JsonConvert.DeserializeXmlNode(result);
-                XmlReader xmlReader = new XmlNodeReader(doc);
-                ds.ReadXml(xmlReader);
-                if (ds.Tables.Contains("address"))
-                {
-                    return ds.Tables["address"];
-                }
-                return null;
-            }
-        }
-
-        public DataTable GetAll
-        {
-            get
-            {
-                DataSet ds = new DataSet("bindhub");
-                string result = null;
-                Uri url = new Uri(_apiUrl + "record.json");
-                string postData = "user=" + _apiUser + "&key=" + _apiKey;
-                HttpWebResponse response = request(url, "POST", postData);
-                logger.Log(NLog.LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
-
-                using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
-                {
-                    result = reader.ReadToEnd();
-                }
-                //logger.Log(NLog.LogLevel.Debug, result);
-                XmlDocument doc = (XmlDocument)JsonConvert.DeserializeXmlNode(result, "entities");
-                XmlReader xmlReader = new XmlNodeReader(doc);
-                ds.ReadXml(xmlReader);
-
-                /*
-                foreach (DataTable table in ds.Tables)
-                    System.Windows.MessageBox.Show(table.TableName);
-                 */
-
-                if (ds.Tables.Contains("entities"))
-                    return ds.Tables["entities"];
-
-                return null;
-            }
-        }
-
+        /// <summary>
+        /// Connects to BindHub Service and updates the IP address for the record
+        /// </summary>
+        /// <param name="record"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
         public DataTable UpdateIp(string record, string target)
         {
-            DataSet ds = new DataSet("bindhub");
+            var ds = new DataSet("bindhub");
             string result = null;
-            Uri url = new Uri(_apiUrl + "record/update.json");
+            var url = new Uri(_apiUrl + "record/update.json");
             string postData = "user=" + _apiUser + "&key=" + _apiKey + "&record=" + record + "&target=" + target;
             HttpWebResponse response = request(url, "POST", postData);
-            logger.Log(NLog.LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
+            logger.Log(LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
 
             using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
             {
@@ -123,7 +194,7 @@ namespace BindHub.Client.Library
             }
             //logger.Log(NLog.LogLevel.Debug, result);
 
-            XmlDocument doc = (XmlDocument)JsonConvert.DeserializeXmlNode(result);
+            XmlDocument doc = JsonConvert.DeserializeXmlNode(result);
             XmlReader xmlReader = new XmlNodeReader(doc);
             ds.ReadXml(xmlReader);
 
@@ -133,49 +204,6 @@ namespace BindHub.Client.Library
                 return ds.Tables["entities"];
 
             return null;
-        }
-
-        public string SetApiUrl
-        {
-            set
-            {
-                if (!string.IsNullOrEmpty(value))
-                    _apiUrl = value;
-            }
-        }
-
-        public string SetApiKey
-        {
-            set
-            {
-                if (!string.IsNullOrEmpty(value))
-                    _apiKey = value;
-            }
-        }
-
-        public string SetApiUser
-        {
-            set
-            {
-                if (!string.IsNullOrEmpty(value))
-                    _apiUser = value;
-            }
-        }
-
-        public WebProxy SetWebProxy
-        {
-            set
-            {
-                _proxy = value;
-            }
-        }
-
-        public bool UseProxy
-        {
-            set
-            {
-                useProxy = value;
-            }
         }
     }
 }

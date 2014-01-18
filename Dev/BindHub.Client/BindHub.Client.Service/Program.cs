@@ -7,9 +7,12 @@ using System.ServiceProcess;
 
 namespace BindHub.Client.Service
 {
-    static class Program
+    internal static class Program
     {
-        static void Main()
+        /// <summary>
+        /// Main entry for Service
+        /// </summary>
+        private static void Main()
         {
             ServiceBase service = new Service();
             ServiceBase.Run(service);

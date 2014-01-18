@@ -5,20 +5,24 @@
 
 using System;
 using System.Net;
+using NLog;
 
 namespace BindHub.Client.Library
 {
     public class Proxy
     {
-        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private string _proxy;
         private Uri _uri;
 
+        /// <summary>
+        /// Checks is the URL will use a default proxy
+        /// </summary>
         private bool useProxy
         {
             get
             {
-                WebProxy proxy = (WebProxy)WebProxy.GetDefaultProxy();
+                WebProxy proxy = WebProxy.GetDefaultProxy();
 
                 // See what proxy is used for resource.
                 Uri resourceProxy = proxy.GetProxy(_uri);
@@ -27,18 +31,18 @@ namespace BindHub.Client.Library
                 if (resourceProxy == _uri)
                 {
                     _proxy = null;
-                    logger.Log(NLog.LogLevel.Debug, "Proxy: None");
+                    logger.Log(LogLevel.Debug, "Proxy: None");
                     return false;
                 }
-                else
-                {
-                    _proxy = resourceProxy.ToString();
-                    logger.Log(NLog.LogLevel.Debug, "Proxy: " + _proxy);
-                    return true;
-                }
+                _proxy = resourceProxy.ToString();
+                logger.Log(LogLevel.Debug, "Proxy: " + _proxy);
+                return true;
             }
         }
 
+        /// <summary>
+        /// If the URL does use a default proxy, get the proxy address
+        /// </summary>
         public string GetProxyAddress
         {
             get
@@ -57,6 +61,9 @@ namespace BindHub.Client.Library
             }
         }
 
+        /// <summary>
+        /// If the URL does use a default proxy, get the proxy port
+        /// </summary>
         public string GetProxyPort
         {
             get
@@ -68,38 +75,56 @@ namespace BindHub.Client.Library
                 string[] proxyPart = _proxy.Split(':');
 
                 if (proxyPart.Length >= 3)
-                    return proxyPart[2].Substring(0,proxyPart[2].Length -1);
+                    return proxyPart[2].Substring(0, proxyPart[2].Length - 1);
                 return null;
             }
         }
 
+        /// <summary>
+        /// Set the URL to be used
+        /// </summary>
         public string SetUrl
         {
-            set
-            {
-                _uri = new Uri(value);
-            }
+            set { _uri = new Uri(value); }
         }
 
+        /// <summary>
+        /// Builds WebProxy based on the parameters passed
+        /// </summary>
+        /// <param name="address">Proxy address</param>
+        /// <param name="port">Proxy port</param>
+        /// <param name="user">Proxy username</param>
+        /// <param name="pass">Proxy password</param>
+        /// <param name="useWin">Proxy use Windows authentication</param>
+        /// <returns></returns>
         public WebProxy GetWebProxy(string address, int? port, string user, string pass, bool? useWin)
         {
             bool _useWin = false;
             int _port = 0;
 
             if (useWin.HasValue)
-                _useWin = (bool)useWin;
+                _useWin = (bool) useWin;
 
             if (port.HasValue)
-                _port = (int)port;
+                _port = (int) port;
 
-            logger.Log(NLog.LogLevel.Debug, port + " - " + _port);
+            logger.Log(LogLevel.Debug, port + " - " + _port);
 
             return getWebProxy(address, _port, user, pass, _useWin);
         }
 
+        /// <summary>
+        /// Builds WebProxy based on the parameters passed
+        /// </summary>
+        /// <param name="address">Proxy address</param>
+        /// <param name="port">Proxy port</param>
+        /// <param name="user">Proxy username</param>
+        /// <param name="pass">Proxy password</param>
+        /// <param name="useWin">Proxy use Windows authentication</param>
+        /// <returns></returns>
         private WebProxy getWebProxy(string address, int port, string user, string pass, bool useWin)
         {
-            logger.Log(NLog.LogLevel.Debug, "Address: " + address + " - Port: " + port);
+            logger.Log(LogLevel.Debug, "Address: " + address + " - Port: " + port);
             WebProxy _proxy = null;
             try
             {
@@ -108,7 +133,7 @@ namespace BindHub.Client.Library
 
                 if (!string.IsNullOrWhiteSpace(user))
                 {
-                    NetworkCredential nc = new NetworkCredential();
+                    var nc = new NetworkCredential();
 
                     string[] userParts = user.Split('\\');
                     if (userParts.Length == 2)
@@ -128,7 +153,7 @@ namespace BindHub.Client.Library
             }
             catch (Exception getWebProxy_Exception)
             {
-                logger.Log(NLog.LogLevel.Error, getWebProxy_Exception);
+                logger.Log(LogLevel.Error, getWebProxy_Exception);
             }
             return _proxy;
         }

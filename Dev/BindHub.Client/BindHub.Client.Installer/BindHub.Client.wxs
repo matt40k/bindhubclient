@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <Product Id="*" Name="BindHub.Client" Language="1033" Version="2.0.0.0" Manufacturer="Matt Smith"
+           UpgradeCode="29DC6C21-9623-4E68-A1F6-DA15B7FFF79C">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+    <Media Id="1" Cabinet="simple.cab" EmbedCab="yes" />
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder" Name="PFiles">
+        <Directory Name="BindHub" Id="BINDHUB">
+          <Component Id="files" Guid="4E81CE90-6682-47D8-A53F-EC004BC976FF">
+            <File Id="BINDHUB.CLIENT.EXE" Name="BindHub.Client.exe" Source="..\build\BindHub.Client.exe" />
+            <File Id="BINDHUB.CLIENT.MONITOR.EXE" Name="BindHub.Client.Monitor.exe"
+                  Source="..\build\BindHub.Client.Monitor.exe" />
+            <File Id="LICENSE.TXT" Name="License.txt" Source="License.txt" />
+            <File Id="NLOG.CONFIG" Name="NLog.config" Source="..\build\NLog.config" />
+            <File Id="NLOG.DLL" Name="NLog.dll" Source="..\build\NLog.dll" />
+          </Component>
+          <Component Id="service" Guid="1E747B02-1E0A-4E54-8961-F673DBB06ADE">
+            <File Id="BINDHUB.CLIENT.SERVICE.EXE" Name="BindHub.Client.Service.exe"
+                  Source="..\build\BindHub.Client.Service.exe" />
+            <ServiceInstall Name="BindHubClientSvc" DisplayName="BindHub Client Service"
+                            Description="BindHub Client Service" Type="ownProcess" Start="auto" ErrorControl="ignore" />
+            <ServiceControl Id="BindHubClientSvc_ServiceControl" Name="BindHubClientSvc" Remove="uninstall"
+                            Stop="uninstall" Wait="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ProgramMenuDir" Name="BindHub">
+          <Component Id="StartMenuShortcuts" Guid="762C35FA-FAFD-454C-903C-9DEDEB468C6C">
+            <RemoveFolder Id="ProgramMenuDir" On="uninstall" />
+            <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value="a" />
+            <util:InternetShortcut Id="WebsiteShortcut" Name="BindHub Client"
+                                   Target="http://bindhubclient.codeplex.com/" />
+            <Shortcut Id="MonitorStartMenuShortcut" Name="BindHub Client Monitor"
+                      Description="Monitors the BindHub Client" Target="[BINDHUB]BindHub.Client.Monitor.exe"
+                      WorkingDirectory="BINDHUB" />
+          </Component>
+        </Directory>
+      </Directory>
+    </Directory>
+    <Feature Id="DefaultFeature" Title="Main Feature" Level="1">
+      <ComponentRef Id="StartMenuShortcuts" />
+      <ComponentRef Id="files" />
+      <ComponentRef Id="service" />
+    </Feature>
+    <InstallExecuteSequence>
+      <Custom Action='LaunchApplication' After='InstallFinalize'>NOT Installed</Custom>
+    </InstallExecuteSequence>
+    <UI>
+      <UIRef Id="WixUI_Minimal" />
+    </UI>
+    <WixVariable Id="WixUILicenseRtf" Value="license.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="Banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="Dialog.bmp" />
+    <Icon Id="Icon1.ico" SourceFile="icon1.ico" />
+    <Property Id="WixShellExecTarget" Value="[#BINDHUB.CLIENT.EXE]" />
+    <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
+    <Property Id="ARPURLINFOABOUT">http://bindhubclient.codeplex.com/</Property>
+    <Property Id="ARPURLUPDATEABOUT">http://bindhubclient.codeplex.com/</Property>
+    <Property Id="ARPNOREPAIR">1</Property>
+    <Property Id="ARPCOMMENTS">BindHub Client</Property>
+    <Property Id="ARPPRODUCTICON">Icon1.ico</Property>
+  </Product>
+</Wix>

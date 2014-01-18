@@ -8,14 +8,14 @@ using System.Reflection;
 
 namespace BindHub.Client.Library
 {
-    class GetExe
+    internal class GetExe
     {
         /// <summary>
         /// Gets the application version
         /// </summary>
         protected internal static string Version
         {
-            get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
+            get { return Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
         }
 
         /// <summary>
@@ -27,11 +27,11 @@ namespace BindHub.Client.Library
             {
                 string prodName;
                 object[] attributes =
-                    System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(
+                    Assembly.GetExecutingAssembly().GetCustomAttributes(
                         typeof (AssemblyProductAttribute), false);
                 if (attributes.Length > 0)
                 {
-                    var productAttribute = (AssemblyProductAttribute)attributes[0];
+                    var productAttribute = (AssemblyProductAttribute) attributes[0];
                     if (productAttribute.Product != "")
                     {
                         prodName = productAttribute.Product;
@@ -40,7 +40,7 @@ namespace BindHub.Client.Library
                         return prodName;
                     }
                 }
-                prodName = Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+                prodName = Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
                 if (prodName.Length > 9)
                     prodName = prodName.Substring(0, (prodName.Length - 8));
                 return prodName;
@@ -52,19 +52,15 @@ namespace BindHub.Client.Library
         /// </summary>
         protected internal static string FileName
         {
-            get
-            {
-                return Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
-            }
+            get { return Path.GetFileName(Assembly.GetExecutingAssembly().CodeBase); }
         }
 
-
+        /// <summary>
+        /// Gets the filepath of the application
+        /// </summary>
         protected internal static string FilePath
         {
-            get
-            {
-                return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).Substring(6);
-            }
+            get { return Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase).Substring(6); }
         }
     }
 }

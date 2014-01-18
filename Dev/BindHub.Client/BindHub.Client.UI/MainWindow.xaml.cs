@@ -4,37 +4,27 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using NLog;
 
 namespace BindHub.Client.UI
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    ///     Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private Config _config;
+        private readonly Config _config;
         private DataTable _dt;
-        private string _updateFreq;
         private string _proxyAddress;
+        private string _proxyPass;
         private string _proxyPort;
         private string _proxyUser;
-        private string _proxyPass;
+        private string _updateFreq;
         private bool _useWin;
 
         public MainWindow(Config config)
@@ -44,6 +34,104 @@ namespace BindHub.Client.UI
             getProxy();
         }
 
+        private bool IsWinAuthChecked
+        {
+            get
+            {
+                bool? value = checkProxyAuth.IsChecked;
+                if (!value.HasValue)
+                {
+                    return false;
+                }
+                if ((bool) value)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        private bool IsProxyChecked
+        {
+            get
+            {
+                bool? value = checkProxy.IsChecked;
+                if (!value.HasValue)
+                {
+                    return false;
+                }
+                if ((bool) value)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        private bool userPassEntered
+        {
+            get
+            {
+                bool userCompleted = !string.IsNullOrWhiteSpace(textUser.Text);
+                bool passCompleted = !string.IsNullOrWhiteSpace(textPass.Text);
+
+                if (userCompleted && passCompleted)
+                    return true;
+
+                string incompleteMessage = "Please enter your ";
+
+                if (!userCompleted && !passCompleted)
+                    incompleteMessage = incompleteMessage + "username and API key";
+                else
+                {
+                    if (!userCompleted)
+                        incompleteMessage = incompleteMessage + "username";
+                    if (!passCompleted)
+                        incompleteMessage = incompleteMessage + "API key";
+                }
+                MessageBox.Show(incompleteMessage, "Missing information", MessageBoxButton.OK,
+                    MessageBoxImage.Exclamation);
+                return false;
+            }
+        }
+
+        private int proxyPort
+        {
+            get
+            {
+                try
+                {
+                    return int.Parse(textProxyPort.Text);
+                }
+                catch (Exception proxyPort_Exception)
+                {
+                    logger.Log(LogLevel.Error, proxyPort_Exception);
+                    return 0;
+                }
+            }
+        }
+
+        private int updateFreq
+        {
+            get
+            {
+                int _updateFreq;
+                try
+                {
+                    _updateFreq = int.Parse(textUpdateFreq.Text);
+                }
+                catch (Exception updateFreq_Exception)
+                {
+                    logger.Log(LogLevel.Error, updateFreq_Exception);
+                    return 5;
+                }
+                logger.Log(LogLevel.Debug, "updateFreq:" + _updateFreq);
+                if (_updateFreq < 5)
+                    return 5;
+                return _updateFreq;
+            }
+        }
+
         private void getProxy()
         {
             string proxyAddress = _config.GetProxyAddress;
@@ -51,10 +139,10 @@ namespace BindHub.Client.UI
 
             if (!string.IsNullOrWhiteSpace(proxyAddress))
             {
-                this.checkProxy.IsChecked = true;
+                checkProxy.IsChecked = true;
                 IsUsingProxy(true);
-                this.textProxyAddress.Text = proxyAddress;
-                this.textProxyPort.Text = proxyPort;
+                textProxyAddress.Text = proxyAddress;
+                textProxyPort.Text = proxyPort;
             }
         }
 
@@ -69,23 +157,6 @@ namespace BindHub.Client.UI
             {
                 textProxyUser.IsEnabled = true;
                 textProxyPass.IsEnabled = true;
-            }
-        }
-
-        private bool IsWinAuthChecked
-        {
-            get
-            {
-                bool? value = this.checkProxyAuth.IsChecked;
-                if (!value.HasValue)
-                {
-                    return false;
-                }
-                if ((bool)value)
-                {
-                    return true;
-                } 
-                return false;
             }
         }
 
@@ -125,23 +196,6 @@ namespace BindHub.Client.UI
             }
         }
 
-        private bool IsProxyChecked
-        {
-            get
-            {
-                bool? value = this.checkProxy.IsChecked;
-                if (!value.HasValue)
-                {
-                    return false;
-                }
-                if ((bool)value)
-                {
-                    return true;
-                } 
-                return false;
-            }
-        }
-
         private void checkProxy_Checked(object sender, RoutedEventArgs e)
         {
             IsUsingProxy(IsProxyChecked);
@@ -155,67 +209,26 @@ namespace BindHub.Client.UI
         private void Connected()
         {
             _dt = _config.GetRecords;
-            this.dataGrid.DataContext = _dt;
-            this.buttonNext.Visibility = Visibility.Hidden;
-            this.dataGrid.Visibility = Visibility.Visible;
-            this.buttonSave.Visibility = Visibility.Visible;
-        }
-
-        private bool userPassEntered
-        {
-            get
-            {
-                bool userCompleted = !string.IsNullOrWhiteSpace(this.textUser.Text);
-                bool passCompleted = !string.IsNullOrWhiteSpace(this.textPass.Text);
-
-                if (userCompleted && passCompleted)
-                    return true;
-
-                string incompleteMessage = "Please enter your ";
-
-                if (!userCompleted && !passCompleted)
-                    incompleteMessage = incompleteMessage + "username and API key";
-                else
-                {
-                    if (!userCompleted)
-                        incompleteMessage = incompleteMessage + "username";
-                    if (!passCompleted)
-                        incompleteMessage = incompleteMessage + "API key";
-                }
-                MessageBox.Show(incompleteMessage,"Missing information",MessageBoxButton.OK,MessageBoxImage.Exclamation);
-                return false;
-            }
+            dataGrid.DataContext = _dt;
+            buttonNext.Visibility = Visibility.Hidden;
+            dataGrid.Visibility = Visibility.Visible;
+            buttonSave.Visibility = Visibility.Visible;
         }
 
         private void nextClick(object sender, RoutedEventArgs e)
         {
             if (userPassEntered)
             {
-                bool result = _config.Write(textUser.Text, textPass.Text, textUrl.Text, updateFreq, textProxyAddress.Text, proxyPort, textProxyUser.Text, textProxyPass.Text, _useWin);
+                bool result = _config.Write(textUser.Text, textPass.Text, textUrl.Text, updateFreq,
+                    textProxyAddress.Text, proxyPort, textProxyUser.Text, textProxyPass.Text, _useWin);
                 if (result)
                 {
-                    logger.Log(NLog.LogLevel.Debug, "Config set");
+                    logger.Log(LogLevel.Debug, "Config set");
                     Connected();
                 }
                 else
                 {
                     MessageBox.Show("Error", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-        private int proxyPort
-        {
-            get
-            {
-                try
-                {
-                    return int.Parse(textProxyPort.Text);
-                }
-                catch (Exception proxyPort_Exception)
-                {
-                    logger.Log(NLog.LogLevel.Error, proxyPort_Exception);
-                    return 0;
                 }
             }
         }
@@ -226,32 +239,11 @@ namespace BindHub.Client.UI
             if (_config.Save)
             {
                 MessageBox.Show("Config saved");
-                this.Close();
+                Close();
             }
             else
             {
-                MessageBox.Show("Error saving","Error",MessageBoxButton.OK,MessageBoxImage.Error);
-            }
-        }
-
-        private int updateFreq
-        {
-            get
-            {
-                int _updateFreq;
-                try
-                {
-                     _updateFreq = int.Parse(textUpdateFreq.Text);
-                }
-                catch (Exception updateFreq_Exception)
-                {
-                    logger.Log(NLog.LogLevel.Error, updateFreq_Exception);
-                    return 5;
-                }
-                logger.Log(NLog.LogLevel.Debug, "updateFreq:" + _updateFreq);
-                if (_updateFreq < 5)
-                    return 5;
-                return _updateFreq;
+                MessageBox.Show("Error saving", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -263,7 +255,7 @@ namespace BindHub.Client.UI
             }
             catch (Exception textUpdateFreq_TextChanged_Exception)
             {
-                logger.Log(NLog.LogLevel.Error, "Invalid entry for UpdateFreq entered - " + textUpdateFreq.Text);
+                logger.Log(LogLevel.Error, "Invalid entry for UpdateFreq entered - " + textUpdateFreq.Text);
             }
             textUpdateFreq.Text = _updateFreq;
         }

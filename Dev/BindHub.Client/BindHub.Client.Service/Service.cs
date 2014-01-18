@@ -3,35 +3,77 @@
  * All code (c) Matthew Smith all rights reserved
  */
 
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.ServiceProcess;
 using System.Threading;
 using NLog;
 using NLog.Config;
+using NLog.Layouts;
 using NLog.Targets;
 
 namespace BindHub.Client.Service
 {
     public partial class Service : ServiceBase
     {
-        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
-        private Process prc;
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private string appName = "BindHub.Client.exe";
+        private string bindhubConfigName = "bindhub.config";
+        private Process prc;
         private ManualResetEvent stoppedEvent;
 
         public Service()
         {
             InitializeComponent();
 
-            this.stoppedEvent = new ManualResetEvent(false);
+            stoppedEvent = new ManualResetEvent(false);
+        }
+
+        /// <summary>
+        /// Checks if the service is running
+        /// </summary>
+        private bool isRunning
+        {
+            get
+            {
+                bool freeToRun;
+                string safeName = "Global\\BindHubClientMutex";
+                using (var m = new Mutex(true, safeName, out freeToRun))
+                    m.Close();
+                return !freeToRun;
+            }
+        }
+
+        /// <summary>
+        /// Gets the log file
+        /// </summary>
+        private string getLogFile
+        {
+            get
+            {
+                LoggingConfiguration config = LogManager.Configuration;
+                var standardTarget = config.FindTargetByName("System") as FileTarget;
+                string expandedFileName = null;
+
+                if (standardTarget != null)
+                {
+                    expandedFileName = SimpleLayout.Evaluate(standardTarget.FileName.ToString());
+                    expandedFileName = expandedFileName.Replace('/', '\\');
+                    if (expandedFileName.Substring(0, 1) == "'")
+                        expandedFileName = expandedFileName.Substring(1);
+                    if (expandedFileName.Substring(expandedFileName.Length - 1) == "'")
+                        expandedFileName = expandedFileName.Substring(0, expandedFileName.Length - 1);
+                }
+                string appDir = Path.GetDirectoryName(expandedFileName);
+                logger.Log(LogLevel.Debug, appDir);
+                return Path.Combine(appDir, bindhubConfigName);
+            }
         }
 
         protected override void OnStart(string[] args)
         {
-            logger.Log(NLog.LogLevel.Debug, "Service started");
-            ThreadPool.QueueUserWorkItem(new WaitCallback(ServiceWorkerThread));
+            logger.Log(LogLevel.Debug, "Service started");
+            ThreadPool.QueueUserWorkItem(ServiceWorkerThread);
         }
 
         private void ServiceWorkerThread(object state)
@@ -40,7 +82,7 @@ namespace BindHub.Client.Service
             {
                 if (!isRunning)
                 {
-                    logger.Log(NLog.LogLevel.Debug, "Loading Client");
+                    logger.Log(LogLevel.Debug, "Loading Client");
                     prc = new Process();
                     prc.StartInfo.CreateNoWindow = true;
                     prc.StartInfo.UseShellExecute = false;
@@ -50,53 +92,18 @@ namespace BindHub.Client.Service
             }
             else
             {
-                this.eventLog1.WriteEntry("BindHub Client not generated."); 
+                eventLog1.WriteEntry("BindHub Client not generated.");
             }
         }
 
-        private bool isRunning
-        {
-            get
-            {
-                bool freeToRun;
-                string safeName = "Global\\BindHubClientMutex";
-                using (Mutex m = new Mutex(true, safeName, out freeToRun))
-                    m.Close();
-                return !freeToRun;
-            }
-        }
-
+        /// <summary>
+        /// Kills all the processes when the service stops (gracefully)
+        /// </summary>
         protected override void OnStop()
         {
             prc.Kill();
             prc.Close();
-            logger.Log(NLog.LogLevel.Debug, "Service stopped");
+            logger.Log(LogLevel.Debug, "Service stopped");
         }
-
-        private string bindhubConfigName = "bindhub.config";
-
-        private string getLogFile
-        {
-            get
-            {
-                LoggingConfiguration config = LogManager.Configuration;
-                FileTarget standardTarget = config.FindTargetByName("System") as FileTarget;
-                string expandedFileName = null;
-
-                if (standardTarget != null)
-                {
-                    expandedFileName = NLog.Layouts.SimpleLayout.Evaluate(standardTarget.FileName.ToString());
-                    expandedFileName = expandedFileName.Replace('/', '\\');
-                    if (expandedFileName.Substring(0, 1) == "'")
-                        expandedFileName = expandedFileName.Substring(1);
-                    if (expandedFileName.Substring(expandedFileName.Length - 1) == "'")
-                        expandedFileName = expandedFileName.Substring(0, expandedFileName.Length - 1);
-                }
-                string appDir = Path.GetDirectoryName(expandedFileName);
-                logger.Log(NLog.LogLevel.Debug, appDir);
-                return Path.Combine(appDir, bindhubConfigName);
-            }
-        }
-
     }
 }

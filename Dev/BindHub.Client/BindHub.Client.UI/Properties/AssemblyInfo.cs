@@ -4,8 +4,6 @@
  */
 
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Resources;
 
 [assembly: AssemblyTitle("BindHub Client")]
@@ -18,4 +16,4 @@ using System.Resources;
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyVersion("2.0.0.0")]
 [assembly: AssemblyFileVersion("2.0.0.0")]
-[assembly: NeutralResourcesLanguageAttribute("en-GB")]
+[assembly: NeutralResourcesLanguage("en-GB")]

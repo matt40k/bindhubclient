@@ -7,12 +7,12 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.ServiceProcess;
 using System.Threading;
 using System.Windows.Forms;
 using NLog;
 using NLog.Config;
+using NLog.Layouts;
 using NLog.Targets;
 
 namespace BindHub.Client.Monitor
@@ -20,26 +20,21 @@ namespace BindHub.Client.Monitor
     public class SysTrayApp : Form
     {
         // Reference: http://alanbondo.wordpress.com/2008/06/22/creating-a-system-tray-app-with-c/
-        [STAThread]
-        public static void Main()
-        {
-            Application.Run(new SysTrayApp());
-        }
 
-        private NotifyIcon trayIcon;
-        private ContextMenu trayMenu;
+        private readonly NotifyIcon trayIcon;
         private BackgroundWorker bStatusWorker;
         private int polling = 30;
+        private ContextMenu trayMenu;
 
         public SysTrayApp()
         {
             bool freeToRun;
             string safeName = "Local\\BindHubClientMonitorMutex";
-            Mutex m = new Mutex(true, safeName, out freeToRun);
+            var m = new Mutex(true, safeName, out freeToRun);
             if (freeToRun)
             {
                 trayMenu = new ContextMenu();
-                MenuItem title = new MenuItem("BindHub Client", OpenSite);
+                var title = new MenuItem("BindHub Client", OpenSite);
                 title.DefaultItem = true;
                 trayMenu.MenuItems.Add(title);
                 trayMenu.MenuItems.Add("-");
@@ -70,6 +65,93 @@ namespace BindHub.Client.Monitor
             {
                 Environment.Exit(5);
             }
+        }
+
+        /// <summary>
+        /// Checks is the application is already running - we limit to only once instance per-user.
+        /// </summary>
+        private bool isRunning
+        {
+            get
+            {
+                try
+                {
+                    bool freeToRun;
+                    string safeName = "Global\\BindHubClientMutex";
+                    using (var m = new Mutex(true, safeName, out freeToRun))
+                        m.Close();
+                    return !freeToRun;
+                }
+                catch (Exception)
+                {
+                    return true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get the Log path
+        /// </summary>
+        private string getLogPath
+        {
+            get
+            {
+                LoggingConfiguration config = LogManager.Configuration;
+                var standardTarget = config.FindTargetByName("System") as FileTarget;
+
+                if (standardTarget != null)
+                {
+                    string expandedFileName = SimpleLayout.Evaluate(standardTarget.FileName.ToString());
+                    expandedFileName = expandedFileName.Replace('/', '\\');
+                    if (expandedFileName.Substring(0, 1) == "'")
+                        expandedFileName = expandedFileName.Substring(1);
+                    if (expandedFileName.Substring(expandedFileName.Length - 1) == "'")
+                        expandedFileName = expandedFileName.Substring(0, expandedFileName.Length - 1);
+                    return expandedFileName;
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Checks if the application is running as a service or in user-mode
+        /// </summary>
+        private bool IsServiceMode
+        {
+            get
+            {
+                LoggingConfiguration config = LogManager.Configuration;
+                var standardTarget = config.FindTargetByName("System") as FileTarget;
+                bool multiConfig =
+                    standardTarget.FileName.ToString().Contains("${specialfolder:folder=CommonApplicationData}");
+                if (multiConfig)
+                {
+                    return IsService;
+                }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Checks if the application is a service
+        /// </summary>
+        private bool IsService
+        {
+            get
+            {
+                foreach (ServiceController sc in ServiceController.GetServices())
+                {
+                    if (sc.ServiceName == "BindHubClientSvc")
+                        return true;
+                }
+                return false;
+            }
+        }
+
+        [STAThread]
+        public static void Main()
+        {
+            Application.Run(new SysTrayApp());
         }
 
         protected override void OnLoad(EventArgs e)
@@ -104,55 +186,37 @@ namespace BindHub.Client.Monitor
                 msgBoxIcon = MessageBoxIcon.Error;
                 msgBoxButtons = MessageBoxButtons.YesNo;
             }
-            DialogResult dialogResult = MessageBox.Show("BindHub client is " + status + "\n\nPlease refer to the log file for more information", "BindHub", msgBoxButtons, msgBoxIcon);
+            DialogResult dialogResult =
+                MessageBox.Show(
+                    "BindHub client is " + status + "\n\nPlease refer to the log file for more information", "BindHub",
+                    msgBoxButtons, msgBoxIcon);
             if (dialogResult == DialogResult.Yes)
             {
                 if (!IsServiceMode)
                 {
-                    Process prc = new Process();
+                    var prc = new Process();
                     prc.StartInfo.FileName = "services.msc";
                     prc.Start();
                 }
                 else
                 {
-                    Process prc = new Process();
+                    var prc = new Process();
                     prc.StartInfo.FileName = "BindHub.Client.exe";
                     prc.Start();
                 }
             }
-
         }
 
         private void OpenLogs(object sender, EventArgs e)
         {
             try
             {
-                Process prc = new Process();
+                var prc = new Process();
                 prc.StartInfo.FileName = getLogPath;
                 prc.Start();
             }
-            catch (System.Exception OpenLogs_LogsException)
+            catch (Exception OpenLogs_LogsException)
             {
-
-            }
-        }
-
-        private bool isRunning
-        {
-            get
-            {
-                try
-                {
-                    bool freeToRun;
-                    string safeName = "Global\\BindHubClientMutex";
-                    using (Mutex m = new Mutex(true, safeName, out freeToRun))
-                        m.Close();
-                    return !freeToRun;
-                }
-                catch (Exception)
-                {
-                    return true;
-                }
             }
         }
 
@@ -170,7 +234,7 @@ namespace BindHub.Client.Monitor
             bStatusWorker = new BackgroundWorker();
             bStatusWorker.WorkerReportsProgress = false;
             bStatusWorker.WorkerSupportsCancellation = false;
-            bStatusWorker.DoWork += new DoWorkEventHandler(ServiceStatusWorker_DoWork);
+            bStatusWorker.DoWork += ServiceStatusWorker_DoWork;
 
             if (bStatusWorker.IsBusy != true)
             {
@@ -178,31 +242,10 @@ namespace BindHub.Client.Monitor
             }
         }
 
-        private string getLogPath
-        {
-            get
-            {
-                LoggingConfiguration config = LogManager.Configuration;
-                FileTarget standardTarget = config.FindTargetByName("System") as FileTarget;
-
-                if (standardTarget != null)
-                {
-                    string expandedFileName = NLog.Layouts.SimpleLayout.Evaluate(standardTarget.FileName.ToString());
-                    expandedFileName = expandedFileName.Replace('/', '\\');
-                    if (expandedFileName.Substring(0, 1) == "'")
-                        expandedFileName = expandedFileName.Substring(1);
-                    if (expandedFileName.Substring(expandedFileName.Length - 1) == "'")
-                        expandedFileName = expandedFileName.Substring(0, expandedFileName.Length - 1);
-                    return expandedFileName;
-                }
-                return null;
-            }
-        }
-
-        private void ServiceStatusWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        private void ServiceStatusWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             bool run = true;
-            if ((bStatusWorker.CancellationPending == true))
+            if (bStatusWorker.CancellationPending)
             {
                 run = false;
             }
@@ -210,7 +253,7 @@ namespace BindHub.Client.Monitor
             {
                 while (run)
                 {
-                    Thread.Sleep(polling * 1000);
+                    Thread.Sleep(polling*1000);
                     if (isRunning)
                         trayIcon.Icon = new Icon(GetType(), "Icon1.ico");
                     else
@@ -223,41 +266,12 @@ namespace BindHub.Client.Monitor
         {
             try
             {
-                Process process = new Process();
+                var process = new Process();
                 process.StartInfo.FileName = "http://bindhubclient.codeplex.com/";
                 process.Start();
             }
             catch (Exception OpenSite_Exception)
             {
-                
-            }
-        }
-
-        private bool IsServiceMode
-        {
-            get
-            {
-                LoggingConfiguration config = LogManager.Configuration;
-                FileTarget standardTarget = config.FindTargetByName("System") as FileTarget;
-                bool multiConfig = standardTarget.FileName.ToString().Contains("${specialfolder:folder=CommonApplicationData}");
-                if (multiConfig)
-                {
-                    return IsService;
-                }
-                return false;
-            }
-        }
-
-        private bool IsService
-        {
-            get
-            {
-                foreach (ServiceController sc in ServiceController.GetServices())
-                {
-                    if (sc.ServiceName == "BindHubClientSvc")
-                        return true;
-                }
-                return false;
             }
         }
     }
