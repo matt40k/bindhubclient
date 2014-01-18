@@ -69,7 +69,6 @@
     </Content>
     <None Include="app.manifest" />
     <None Include="NLog.xsd" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Args.cs" />
