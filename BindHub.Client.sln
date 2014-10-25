@@ -16,27 +16,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUILD", "BUILD", "{87F447A2-5156-4373-A0C1-11F7AEBE3869}"
 EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 6
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs17
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = BindHub.Client.Monitor\\BindHub.Client.Monitor.csproj
-		SccProjectName1 = BindHub.Client.Monitor
-		SccLocalPath1 = BindHub.Client.Monitor
-		SccProjectUniqueName2 = BindHub.Client.Service\\BindHub.Client.Service.csproj
-		SccProjectName2 = BindHub.Client.Service
-		SccLocalPath2 = BindHub.Client.Service
-		SccProjectUniqueName3 = BindHub.Client.UI\\BindHub.Client.UI.csproj
-		SccProjectName3 = BindHub.Client.UI
-		SccLocalPath3 = BindHub.Client.UI
-		SccProjectUniqueName4 = BindHub.Client.Library\\BindHub.Client.Library.csproj
-		SccProjectName4 = BindHub.Client.Library
-		SccLocalPath4 = BindHub.Client.Library
-		SccProjectUniqueName5 = BindHub.Client.Installer\\BindHub.Client.Installer.wixproj
-		SccProjectName5 = BindHub.Client.Installer
-		SccLocalPath5 = BindHub.Client.Installer
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
