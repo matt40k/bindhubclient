@@ -1,0 +1,85 @@
+﻿<Window x:Class="BindHub.Client.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Configuration - BindHub Client" Height="420" Width="700" Icon="Icon1.ico">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+
+            <RowDefinition Height="30" />
+
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+
+            <RowDefinition Height="60" />
+
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="100" />
+
+            <ColumnDefinition Width="150" />
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label Content="Username:" Grid.Column="2" Grid.Row="1" />
+        <TextBox Name="textUser" Grid.Column="3" Grid.Row="1" Width="240" Height="25" HorizontalAlignment="Left" />
+
+        <Label Content="API key:" Grid.Column="2" Grid.Row="2" />
+        <TextBox Name="textPass" Grid.Column="3" Grid.Row="2" Width="240" Height="25" HorizontalAlignment="Left" />
+
+        <Label Content="URL:" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="3" VerticalAlignment="Top" />
+        <TextBox Name="textUrl" Grid.Column="3" Grid.Row="3" Width="240" Height="25" IsEnabled="False"
+                 Text="https://www.bindhub.com/api/" HorizontalAlignment="Left" />
+
+        <Label Content="Update frequency:" Grid.Column="2" Grid.Row="4" />
+        <TextBox Name="textUpdateFreq" Grid.Column="3" Grid.Row="4" Width="40" Height="25" HorizontalAlignment="Left"
+                 Text="5" TextChanged="textUpdateFreq_TextChanged" />
+
+        <!-- Proxy Start -->
+        <CheckBox Name="checkProxy" Content="Proxy" Grid.Column="2" Grid.Row="5" VerticalAlignment="Center"
+                  Unchecked="checkProxy_Checked" Checked="checkProxy_Checked" />
+
+        <Label Content="Address:" Grid.Column="2" Grid.Row="6" />
+        <TextBox Name="textProxyAddress" Grid.Column="3" Grid.Row="6" Width="240" Height="25" IsEnabled="False"
+                 HorizontalAlignment="Left" />
+
+        <Label Content="Port:" Grid.Column="2" Grid.Row="7" />
+        <TextBox Name="textProxyPort" Grid.Column="3" Grid.Row="7" Width="40" Height="25" IsEnabled="False"
+                 HorizontalAlignment="Left" />
+
+        <CheckBox Name="checkProxyAuth" Content="Windows Authentication" Grid.Column="3" Grid.Row="8"
+                  VerticalAlignment="Center" IsEnabled="False" Unchecked="checkProxyAuth_Unchecked"
+                  Checked="checkProxyAuth_Unchecked" />
+
+        <Label Content="User:" Grid.Column="2" Grid.Row="9" />
+        <TextBox Name="textProxyUser" Grid.Column="3" Grid.Row="9" Width="240" Height="25" IsEnabled="False"
+                 HorizontalAlignment="Left" />
+
+        <Label Content="Password:" Grid.Column="2" Grid.Row="10" />
+        <TextBox Name="textProxyPass" Grid.Column="3" Grid.Row="10" Width="240" Height="25" IsEnabled="False"
+                 HorizontalAlignment="Left" />
+
+        <!-- Proxy End -->
+
+        <Button Name="buttonNext" Content="Next" Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="11"
+                VerticalAlignment="Center" HorizontalAlignment="Center" Width="100" Height="30" Click="nextClick" />
+
+        <DataGrid Name="dataGrid" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="10"
+                  Visibility="Hidden" AutoGenerateColumns="True" ItemsSource="{Binding Path=.}" />
+        <Button Name="buttonSave" Content="Save" Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="11"
+                VerticalAlignment="Center" HorizontalAlignment="Center" Width="100" Height="30" Click="saveClick"
+                Visibility="Hidden" />
+    </Grid>
+</Window>
