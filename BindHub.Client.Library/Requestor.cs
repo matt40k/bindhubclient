@@ -10,14 +10,12 @@ using System.Net;
 using System.Text;
 using System.Xml;
 using Newtonsoft.Json;
-using NLog;
 
 namespace BindHub.Client.Library
 {
     public class Requestor
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         private string _apiKey;
         private string _apiUrl;
         private string _apiUser;
@@ -25,7 +23,7 @@ namespace BindHub.Client.Library
         private bool useProxy;
 
         /// <summary>
-        /// Queries the BindHub service for your current (public) IP
+        ///     Queries the BindHub service for your current (public) IP
         /// </summary>
         public DataTable GetIp
         {
@@ -34,7 +32,7 @@ namespace BindHub.Client.Library
                 var ds = new DataSet("bindhub");
                 string result = null;
                 var url = new Uri(_apiUrl + "ip.json");
-                HttpWebResponse response = request(url, "GET", null);
+                var response = request(url, "GET", null);
                 logger.Log(LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
 
                 using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
@@ -43,7 +41,7 @@ namespace BindHub.Client.Library
                 }
                 //logger.Log(NLog.LogLevel.Debug, result);
 
-                XmlDocument doc = JsonConvert.DeserializeXmlNode(result);
+                var doc = JsonConvert.DeserializeXmlNode(result);
                 XmlReader xmlReader = new XmlNodeReader(doc);
                 ds.ReadXml(xmlReader);
                 if (ds.Tables.Contains("address"))
@@ -55,7 +53,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Queries the BindHub service for your  list of records
+        ///     Queries the BindHub service for your  list of records
         /// </summary>
         public DataTable GetAll
         {
@@ -64,8 +62,8 @@ namespace BindHub.Client.Library
                 var ds = new DataSet("bindhub");
                 string result = null;
                 var url = new Uri(_apiUrl + "record.json");
-                string postData = "user=" + _apiUser + "&key=" + _apiKey;
-                HttpWebResponse response = request(url, "POST", postData);
+                var postData = "user=" + _apiUser + "&key=" + _apiKey;
+                var response = request(url, "POST", postData);
                 logger.Log(LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
 
                 using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
@@ -73,7 +71,7 @@ namespace BindHub.Client.Library
                     result = reader.ReadToEnd();
                 }
                 //logger.Log(NLog.LogLevel.Debug, result);
-                XmlDocument doc = JsonConvert.DeserializeXmlNode(result, "entities");
+                var doc = JsonConvert.DeserializeXmlNode(result, "entities");
                 XmlReader xmlReader = new XmlNodeReader(doc);
                 ds.ReadXml(xmlReader);
 
@@ -90,7 +88,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Sets the BindHub API url
+        ///     Sets the BindHub API url
         /// </summary>
         public string SetApiUrl
         {
@@ -102,7 +100,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Sets the BindHub API key
+        ///     Sets the BindHub API key
         /// </summary>
         public string SetApiKey
         {
@@ -114,7 +112,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Sets the BindHub API Username
+        ///     Sets the BindHub API Username
         /// </summary>
         public string SetApiUser
         {
@@ -126,7 +124,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Sets the WebProxy
+        ///     Sets the WebProxy
         /// </summary>
         public WebProxy SetWebProxy
         {
@@ -134,7 +132,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Sets if the WebProxy is used
+        ///     Sets if the WebProxy is used
         /// </summary>
         public bool UseProxy
         {
@@ -142,7 +140,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Returns the HttpWebResponse to the request
+        ///     Returns the HttpWebResponse to the request
         /// </summary>
         /// <param name="url">URL to connect to</param>
         /// <param name="method">POST\GET</param>
@@ -174,7 +172,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Connects to BindHub Service and updates the IP address for the record
+        ///     Connects to BindHub Service and updates the IP address for the record
         /// </summary>
         /// <param name="record"></param>
         /// <param name="target"></param>
@@ -184,8 +182,8 @@ namespace BindHub.Client.Library
             var ds = new DataSet("bindhub");
             string result = null;
             var url = new Uri(_apiUrl + "record/update.json");
-            string postData = "user=" + _apiUser + "&key=" + _apiKey + "&record=" + record + "&target=" + target;
-            HttpWebResponse response = request(url, "POST", postData);
+            var postData = "user=" + _apiUser + "&key=" + _apiKey + "&record=" + record + "&target=" + target;
+            var response = request(url, "POST", postData);
             logger.Log(LogLevel.Debug, response.StatusCode + " - " + response.StatusDescription);
 
             using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
@@ -194,7 +192,7 @@ namespace BindHub.Client.Library
             }
             //logger.Log(NLog.LogLevel.Debug, result);
 
-            XmlDocument doc = JsonConvert.DeserializeXmlNode(result);
+            var doc = JsonConvert.DeserializeXmlNode(result);
             XmlReader xmlReader = new XmlNodeReader(doc);
             ds.ReadXml(xmlReader);
 

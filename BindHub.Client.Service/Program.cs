@@ -10,7 +10,7 @@ namespace BindHub.Client.Service
     internal static class Program
     {
         /// <summary>
-        /// Main entry for Service
+        ///     Main entry for Service
         /// </summary>
         private static void Main()
         {

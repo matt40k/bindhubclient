@@ -10,26 +10,22 @@ using System.Drawing;
 using System.ServiceProcess;
 using System.Threading;
 using System.Windows.Forms;
-using NLog;
-using NLog.Config;
-using NLog.Layouts;
-using NLog.Targets;
 
 namespace BindHub.Client.Monitor
 {
     public class SysTrayApp : Form
     {
+        private BackgroundWorker bStatusWorker;
+        private readonly int polling = 30;
         // Reference: http://alanbondo.wordpress.com/2008/06/22/creating-a-system-tray-app-with-c/
 
         private readonly NotifyIcon trayIcon;
-        private BackgroundWorker bStatusWorker;
-        private int polling = 30;
-        private ContextMenu trayMenu;
+        private readonly ContextMenu trayMenu;
 
         public SysTrayApp()
         {
             bool freeToRun;
-            string safeName = "Local\\BindHubClientMonitorMutex";
+            var safeName = "Local\\BindHubClientMonitorMutex";
             var m = new Mutex(true, safeName, out freeToRun);
             if (freeToRun)
             {
@@ -68,7 +64,7 @@ namespace BindHub.Client.Monitor
         }
 
         /// <summary>
-        /// Checks is the application is already running - we limit to only once instance per-user.
+        ///     Checks is the application is already running - we limit to only once instance per-user.
         /// </summary>
         private bool isRunning
         {
@@ -77,7 +73,7 @@ namespace BindHub.Client.Monitor
                 try
                 {
                     bool freeToRun;
-                    string safeName = "Global\\BindHubClientMutex";
+                    var safeName = "Global\\BindHubClientMutex";
                     using (var m = new Mutex(true, safeName, out freeToRun))
                         m.Close();
                     return !freeToRun;
@@ -90,7 +86,7 @@ namespace BindHub.Client.Monitor
         }
 
         /// <summary>
-        /// Get the Log path
+        ///     Get the Log path
         /// </summary>
         private string getLogPath
         {
@@ -114,7 +110,7 @@ namespace BindHub.Client.Monitor
         }
 
         /// <summary>
-        /// Checks if the application is running as a service or in user-mode
+        ///     Checks if the application is running as a service or in user-mode
         /// </summary>
         private bool IsServiceMode
         {
@@ -133,13 +129,13 @@ namespace BindHub.Client.Monitor
         }
 
         /// <summary>
-        /// Checks if the application is a service
+        ///     Checks if the application is a service
         /// </summary>
         private bool IsService
         {
             get
             {
-                foreach (ServiceController sc in ServiceController.GetServices())
+                foreach (var sc in ServiceController.GetServices())
                 {
                     if (sc.ServiceName == "BindHubClientSvc")
                         return true;
@@ -186,7 +182,7 @@ namespace BindHub.Client.Monitor
                 msgBoxIcon = MessageBoxIcon.Error;
                 msgBoxButtons = MessageBoxButtons.YesNo;
             }
-            DialogResult dialogResult =
+            var dialogResult =
                 MessageBox.Show(
                     "BindHub client is " + status + "\n\nPlease refer to the log file for more information", "BindHub",
                     msgBoxButtons, msgBoxIcon);
@@ -244,7 +240,7 @@ namespace BindHub.Client.Monitor
 
         private void ServiceStatusWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            bool run = true;
+            var run = true;
             if (bStatusWorker.CancellationPending)
             {
                 run = false;

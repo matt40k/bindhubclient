@@ -7,7 +7,6 @@ using System;
 using System.Data;
 using System.Windows;
 using System.Windows.Controls;
-using NLog;
 
 namespace BindHub.Client.UI
 {
@@ -17,8 +16,6 @@ namespace BindHub.Client.UI
     public partial class MainWindow : Window
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
-        private readonly Config _config;
         private DataTable _dt;
         private string _proxyAddress;
         private string _proxyPass;
@@ -26,6 +23,7 @@ namespace BindHub.Client.UI
         private string _proxyUser;
         private string _updateFreq;
         private bool _useWin;
+        private readonly Config _config;
 
         public MainWindow(Config config)
         {
@@ -38,7 +36,7 @@ namespace BindHub.Client.UI
         {
             get
             {
-                bool? value = checkProxyAuth.IsChecked;
+                var value = checkProxyAuth.IsChecked;
                 if (!value.HasValue)
                 {
                     return false;
@@ -55,7 +53,7 @@ namespace BindHub.Client.UI
         {
             get
             {
-                bool? value = checkProxy.IsChecked;
+                var value = checkProxy.IsChecked;
                 if (!value.HasValue)
                 {
                     return false;
@@ -72,13 +70,13 @@ namespace BindHub.Client.UI
         {
             get
             {
-                bool userCompleted = !string.IsNullOrWhiteSpace(textUser.Text);
-                bool passCompleted = !string.IsNullOrWhiteSpace(textPass.Text);
+                var userCompleted = !string.IsNullOrWhiteSpace(textUser.Text);
+                var passCompleted = !string.IsNullOrWhiteSpace(textPass.Text);
 
                 if (userCompleted && passCompleted)
                     return true;
 
-                string incompleteMessage = "Please enter your ";
+                var incompleteMessage = "Please enter your ";
 
                 if (!userCompleted && !passCompleted)
                     incompleteMessage = incompleteMessage + "username and API key";

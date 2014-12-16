@@ -5,26 +5,23 @@
 
 using System;
 using System.ServiceProcess;
-using NLog;
 
 namespace BindHub.Client.UI
 {
     public class SvcMan
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         protected static string serviceName = "BindHubClientSvc";
         private readonly ServiceController service = new ServiceController(serviceName);
         private readonly TimeSpan timeout = TimeSpan.FromMilliseconds(300);
 
         /// <summary>
-        /// 
         /// </summary>
         public bool IsService
         {
             get
             {
-                foreach (ServiceController sc in ServiceController.GetServices())
+                foreach (var sc in ServiceController.GetServices())
                 {
                     if (sc.ServiceName == serviceName)
                         return true;
@@ -34,7 +31,7 @@ namespace BindHub.Client.UI
         }
 
         /// <summary>
-        /// Starts the BindHub.Client as a Windows Service
+        ///     Starts the BindHub.Client as a Windows Service
         /// </summary>
         private void StartService()
         {
@@ -50,7 +47,7 @@ namespace BindHub.Client.UI
         }
 
         /// <summary>
-        /// Stops the BindHub.Client running (as a Windows Service)
+        ///     Stops the BindHub.Client running (as a Windows Service)
         /// </summary>
         private void StopService()
         {
@@ -66,7 +63,7 @@ namespace BindHub.Client.UI
         }
 
         /// <summary>
-        /// Stops and starts the BindHub.Client service
+        ///     Stops and starts the BindHub.Client service
         /// </summary>
         private void RestartService()
         {
@@ -75,12 +72,12 @@ namespace BindHub.Client.UI
         }
 
         /// <summary>
-        /// Reloads the BindHub.Client service status 
-        /// and restarts the service or starts it if its stopped
+        ///     Reloads the BindHub.Client service status
+        ///     and restarts the service or starts it if its stopped
         /// </summary>
         public void ReloadService()
         {
-            ServiceControllerStatus status = service.Status;
+            var status = service.Status;
 
             switch (status)
             {

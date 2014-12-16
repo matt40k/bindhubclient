@@ -7,20 +7,16 @@ using System.Diagnostics;
 using System.IO;
 using System.ServiceProcess;
 using System.Threading;
-using NLog;
-using NLog.Config;
-using NLog.Layouts;
-using NLog.Targets;
 
 namespace BindHub.Client.Service
 {
     public partial class Service : ServiceBase
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-        private string appName = "BindHub.Client.exe";
-        private string bindhubConfigName = "bindhub.config";
         private Process prc;
         private ManualResetEvent stoppedEvent;
+        private readonly string appName = "BindHub.Client.exe";
+        private readonly string bindhubConfigName = "bindhub.config";
 
         public Service()
         {
@@ -30,14 +26,14 @@ namespace BindHub.Client.Service
         }
 
         /// <summary>
-        /// Checks if the service is running
+        ///     Checks if the service is running
         /// </summary>
         private bool isRunning
         {
             get
             {
                 bool freeToRun;
-                string safeName = "Global\\BindHubClientMutex";
+                var safeName = "Global\\BindHubClientMutex";
                 using (var m = new Mutex(true, safeName, out freeToRun))
                     m.Close();
                 return !freeToRun;
@@ -45,7 +41,7 @@ namespace BindHub.Client.Service
         }
 
         /// <summary>
-        /// Gets the log file
+        ///     Gets the log file
         /// </summary>
         private string getLogFile
         {
@@ -64,7 +60,7 @@ namespace BindHub.Client.Service
                     if (expandedFileName.Substring(expandedFileName.Length - 1) == "'")
                         expandedFileName = expandedFileName.Substring(0, expandedFileName.Length - 1);
                 }
-                string appDir = Path.GetDirectoryName(expandedFileName);
+                var appDir = Path.GetDirectoryName(expandedFileName);
                 logger.Log(LogLevel.Debug, appDir);
                 return Path.Combine(appDir, bindhubConfigName);
             }
@@ -97,7 +93,7 @@ namespace BindHub.Client.Service
         }
 
         /// <summary>
-        /// Kills all the processes when the service stops (gracefully)
+        ///     Kills all the processes when the service stops (gracefully)
         /// </summary>
         protected override void OnStop()
         {

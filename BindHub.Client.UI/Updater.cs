@@ -5,18 +5,15 @@
 
 using System.Data;
 using System.Threading;
-using NLog;
 
 namespace BindHub.Client.UI
 {
     public class Updater
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         private readonly Config _config;
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="config"></param>
         public Updater(Config config)
@@ -25,8 +22,8 @@ namespace BindHub.Client.UI
         }
 
         /// <summary>
-        /// Worker is the actual logic that runs to see if there 
-        /// are any changes and updates if there are
+        ///     Worker is the actual logic that runs to see if there
+        ///     are any changes and updates if there are
         /// </summary>
         public void Worker()
         {
@@ -42,8 +39,8 @@ namespace BindHub.Client.UI
                 {
                     if (dr["sync"].ToString().ToLower() == "true")
                     {
-                        string target = dr["target"].ToString();
-                        string record = dr["record"].ToString();
+                        var target = dr["target"].ToString();
+                        var record = dr["record"].ToString();
 
                         if (dr["target"].ToString() != _publicIP)
                         {

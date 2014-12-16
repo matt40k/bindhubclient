@@ -6,7 +6,6 @@
 using System;
 using System.Threading;
 using System.Windows;
-using NLog;
 
 namespace BindHub.Client.UI
 {
@@ -24,7 +23,7 @@ namespace BindHub.Client.UI
             {
                 try
                 {
-                    string safeName = "Global\\BindHubClientMutex";
+                    var safeName = "Global\\BindHubClientMutex";
                     using (var m = new Mutex(true, safeName, out freeToRun))
                         if (freeToRun)
                         {

@@ -5,7 +5,6 @@
 
 using System;
 using System.Net;
-using NLog;
 
 namespace BindHub.Client.Library
 {
@@ -16,16 +15,16 @@ namespace BindHub.Client.Library
         private Uri _uri;
 
         /// <summary>
-        /// Checks is the URL will use a default proxy
+        ///     Checks is the URL will use a default proxy
         /// </summary>
         private bool useProxy
         {
             get
             {
-                WebProxy proxy = WebProxy.GetDefaultProxy();
+                var proxy = WebProxy.GetDefaultProxy();
 
                 // See what proxy is used for resource.
-                Uri resourceProxy = proxy.GetProxy(_uri);
+                var resourceProxy = proxy.GetProxy(_uri);
 
                 // Test to see whether a proxy was selected.
                 if (resourceProxy == _uri)
@@ -41,7 +40,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// If the URL does use a default proxy, get the proxy address
+        ///     If the URL does use a default proxy, get the proxy address
         /// </summary>
         public string GetProxyAddress
         {
@@ -53,7 +52,7 @@ namespace BindHub.Client.Library
                     {
                         return null;
                     }
-                    string[] proxyPart = _proxy.Split(':');
+                    var proxyPart = _proxy.Split(':');
                     if (proxyPart.Length >= 2)
                         return proxyPart[1].Substring(2);
                 }
@@ -62,7 +61,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// If the URL does use a default proxy, get the proxy port
+        ///     If the URL does use a default proxy, get the proxy port
         /// </summary>
         public string GetProxyPort
         {
@@ -72,7 +71,7 @@ namespace BindHub.Client.Library
                 {
                     return null;
                 }
-                string[] proxyPart = _proxy.Split(':');
+                var proxyPart = _proxy.Split(':');
 
                 if (proxyPart.Length >= 3)
                     return proxyPart[2].Substring(0, proxyPart[2].Length - 1);
@@ -81,7 +80,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Set the URL to be used
+        ///     Set the URL to be used
         /// </summary>
         public string SetUrl
         {
@@ -89,7 +88,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Builds WebProxy based on the parameters passed
+        ///     Builds WebProxy based on the parameters passed
         /// </summary>
         /// <param name="address">Proxy address</param>
         /// <param name="port">Proxy port</param>
@@ -99,8 +98,8 @@ namespace BindHub.Client.Library
         /// <returns></returns>
         public WebProxy GetWebProxy(string address, int? port, string user, string pass, bool? useWin)
         {
-            bool _useWin = false;
-            int _port = 0;
+            var _useWin = false;
+            var _port = 0;
 
             if (useWin.HasValue)
                 _useWin = (bool) useWin;
@@ -114,7 +113,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Builds WebProxy based on the parameters passed
+        ///     Builds WebProxy based on the parameters passed
         /// </summary>
         /// <param name="address">Proxy address</param>
         /// <param name="port">Proxy port</param>
@@ -135,7 +134,7 @@ namespace BindHub.Client.Library
                 {
                     var nc = new NetworkCredential();
 
-                    string[] userParts = user.Split('\\');
+                    var userParts = user.Split('\\');
                     if (userParts.Length == 2)
                     {
                         nc.UserName = userParts[0];

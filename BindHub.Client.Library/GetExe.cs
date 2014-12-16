@@ -11,7 +11,7 @@ namespace BindHub.Client.Library
     internal class GetExe
     {
         /// <summary>
-        /// Gets the application version
+        ///     Gets the application version
         /// </summary>
         protected internal static string Version
         {
@@ -19,14 +19,14 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Gets the applications Product.
+        ///     Gets the applications Product.
         /// </summary>
         protected internal static string Product
         {
             get
             {
                 string prodName;
-                object[] attributes =
+                var attributes =
                     Assembly.GetExecutingAssembly().GetCustomAttributes(
                         typeof (AssemblyProductAttribute), false);
                 if (attributes.Length > 0)
@@ -48,7 +48,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Gets the applications FileName.
+        ///     Gets the applications FileName.
         /// </summary>
         protected internal static string FileName
         {
@@ -56,7 +56,7 @@ namespace BindHub.Client.Library
         }
 
         /// <summary>
-        /// Gets the filepath of the application
+        ///     Gets the filepath of the application
         /// </summary>
         protected internal static string FilePath
         {
