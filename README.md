@@ -1,6 +1,9 @@
 bindhubclient
 =============
 
+**NO LONGER VALID - BindHub.com, the DNS service, shutdown**
+
+
 BindHub Client is a free and open-source BindHub updater client for Microsoft Windows based machines.
 
 BindHub.com provides free and premium dynamic DNS services with an open REST API to enable easy integration into other applications perfect the 22nd century!
